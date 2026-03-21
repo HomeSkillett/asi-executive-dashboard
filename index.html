@@ -1,0 +1,3097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASI Executive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* =============================================
+     Mobius Design System — Font Tokens
+     ============================================= */
+  :root {
+    --default-font: "Roboto Condensed", "Roboto", Arial, sans-serif;
+    --header-font: "Roboto", Arial, sans-serif;
+    --font-thin: 100;
+    --font-light: 300;
+    --font-normal: 400;
+    --font-bold: 700;
+    --size-hdrLg: 36px;
+    --size-hdrMd: 24px;
+    --size-hdrSm: 18px;
+    --size-default: 14px;
+    --size-Sm: 11px;
+    --size-meta: 14px;
+    --size-metaSm: 11px;
+    --lh-hdrLg: 40px;
+    --lh-hdrMd: 30px;
+    --lh-hdrSm: 22px;
+    --lh-default: 20px;
+    --lh-Sm: 14px;
+    --lh-meta: 14px;
+    --lh-metaSm: 11px;
+  }
+
+  /* Theme variables are applied via JS on :root */
+
+  /* =============================================
+     Dashboard Layout — Using Mobius Tokens
+     ============================================= */
+  body {
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--ForegroundPrimary);
+    background: var(--BackgroundPrimary);
+    padding: 24px;
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* === HEADER BAR === */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .dashboard-header h1 {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .subtitle {
+    color: var(--GaugeForeground);
+    font-size: var(--size-default);
+    margin-bottom: 28px;
+  }
+
+  /* === THEME SWITCHER === */
+  .theme-switcher {
+    position: relative;
+  }
+
+  .theme-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--InnerLines);
+    background: var(--BackgroundStrong);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: all 0.2s ease;
+  }
+
+  .theme-btn:hover {
+    border-color: var(--ForegroundAction);
+    box-shadow: 0 2px 8px var(--ShadowElements);
+  }
+
+  .theme-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .theme-menu {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px var(--ShadowElements);
+    min-width: 200px;
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+
+  .theme-menu.open { display: block; }
+
+  .theme-menu-header {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--GaugeForeground);
+    padding: 12px 16px 8px;
+  }
+
+  .theme-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: var(--size-default);
+    color: var(--ForegroundPrimary);
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--default-font);
+  }
+
+  .theme-option:hover {
+    background: var(--MouseOverBackground);
+  }
+
+  .theme-option.active {
+    color: var(--ForegroundAction);
+    font-weight: var(--font-bold);
+  }
+
+  .theme-swatch {
+    display: flex;
+    gap: 2px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .theme-swatch span {
+    width: 8px;
+    height: 24px;
+  }
+
+  .theme-option .check {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--ForegroundAction);
+    opacity: 0;
+  }
+
+  .theme-option.active .check { opacity: 1; }
+
+  .section-label {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--GaugeForeground);
+    margin: 32px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--InnerLines);
+  }
+
+  /* === KPI CARDS === */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .kpi-card {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .kpi-card .label {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    text-transform: uppercase;
+    color: var(--GaugeForeground);
+    margin-bottom: 8px;
+  }
+
+  .kpi-card .value {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+    letter-spacing: -0.5px;
+  }
+
+  .kpi-card .change {
+    font-size: var(--size-Sm);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .kpi-card .change.up { color: var(--InformationGreen); }
+  .kpi-card .change.down { color: var(--InformationRed); }
+
+  .kpi-card .icon {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--size-hdrSm);
+  }
+
+  /* === SELL PRODUCT — 6-COLUMN KPI ROW === */
+  .sell-product-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .sell-kpi {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sell-kpi .sell-kpi-label {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    text-transform: uppercase;
+    color: var(--ForegroundAction);
+    margin-bottom: 10px;
+  }
+
+  .sell-kpi .sell-kpi-value {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+    letter-spacing: -0.5px;
+  }
+
+  .sell-kpi .sell-kpi-sub {
+    font-size: var(--size-Sm);
+    color: var(--GaugeForeground);
+    margin-top: 6px;
+  }
+
+  .sell-kpi .sell-kpi-change {
+    font: var(--font-bold) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sell-kpi .sell-kpi-change.up { color: var(--InformationGreen); }
+  .sell-kpi .sell-kpi-change.down { color: var(--InformationRed); }
+  .sell-kpi .sell-kpi-change.flat { color: var(--InformationOrange); }
+
+  .sell-kpi .sell-kpi-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 8px 0 0 8px;
+  }
+
+  /* Pipeline sub-values */
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .pipeline-item {
+    text-align: center;
+  }
+
+  .pipeline-item .pip-val {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .pipeline-item .pip-label {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* === BURNUP CHART WIDGET === */
+  .burnup-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+  }
+
+  .burnup-widget .burnup-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .burnup-widget .burnup-value-line {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundPrimary);
+    padding-bottom: 10px;
+  }
+
+  .burnup-widget .burnup-value-line .bv-number {
+    font-weight: var(--font-bold);
+  }
+
+  .burnup-widget .burnup-value-line .bv-label {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    text-transform: uppercase;
+  }
+
+  .burnup-widget .burnup-chart-area {
+    flex: 1;
+    min-height: 120px;
+    position: relative;
+  }
+
+  .burnup-widget .burnup-chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .burnup-widget .burnup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .burnup-widget .burnup-delta {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--InformationGreen);
+  }
+
+  .burnup-widget .burnup-legend {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .burnup-widget .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+  }
+
+  .burnup-widget .legend-line {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  /* === GAUGE WIDGET (Performance vs Manned) === */
+  .gauge-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+  }
+
+  .gauge-widget .gauge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .gauge-widget .gauge-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .gauge-widget .gauge-link-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--GaugeForeground);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .gauge-widget .gauge-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    height: 155px;
+    margin: 4px auto 0;
+  }
+
+  .gauge-widget .gauge-wrap svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .gauge-widget .gauge-value {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font: var(--font-bold) var(--size-hdrLg) / 1 var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .gauge-widget .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 280px;
+    margin: -2px auto 0;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .gauge-widget .gauge-footer {
+    border-top: 1px solid var(--InnerLines);
+    padding-top: 4px;
+    margin-top: auto;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-align: center;
+  }
+
+  .gauge-widget .gauge-footer .gauge-delta {
+    font-weight: var(--font-bold);
+    color: var(--InformationGreen);
+  }
+
+  /* === MTTI WIDGET (Mean Time to Intervention) === */
+  .mtti-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .mtti-widget .mtti-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .mtti-widget .mtti-title .mtti-sub {
+    font: var(--font-light) var(--size-default) / var(--lh-default) var(--header-font);
+    text-transform: none;
+    color: var(--ForegroundAction);
+  }
+
+  .mtti-widget .mtti-value-line {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundPrimary);
+    padding-bottom: 4px;
+  }
+
+  .mtti-widget .mtti-value-line .mv-number {
+    font-weight: var(--font-bold);
+  }
+
+  .mtti-widget .mtti-value-line .mv-label {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+  }
+
+  .mtti-widget .mtti-chart-area {
+    flex: 1;
+    min-height: 120px;
+    position: relative;
+  }
+
+  .mtti-widget .mtti-chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .mtti-widget .mtti-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .mtti-widget .mtti-footer .mtti-delta {
+    font: var(--font-bold) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--InformationGreen);
+  }
+
+  .mtti-widget .mtti-footer .mtti-ctx {
+    font: var(--font-light) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .mtti-widget .mtti-footer .mtti-arrow {
+    color: var(--InformationGreen);
+    font-size: 14px;
+  }
+
+  /* === WARRANTY WIDGET (Reliability — Stacked Bar) === */
+  .warranty-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .warranty-widget .warranty-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .warranty-widget .warranty-value-line {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundPrimary);
+    padding-bottom: 4px;
+  }
+
+  .warranty-widget .warranty-value-line .wv-number {
+    font-weight: var(--font-bold);
+  }
+
+  .warranty-widget .warranty-value-line .wv-label {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+  }
+
+  .warranty-widget .warranty-chart-area {
+    flex: 1;
+    min-height: 120px;
+    position: relative;
+  }
+
+  .warranty-widget .warranty-chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .warranty-widget .warranty-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .warranty-widget .warranty-delta {
+    font: var(--font-bold) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--InformationGreen);
+  }
+
+  .warranty-widget .warranty-legend {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .warranty-widget .warranty-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .warranty-widget .warranty-legend .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* === CONTRIBUTION MARGIN WIDGET (Horizontal Bar) === */
+  .margin-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .margin-widget .margin-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .margin-widget .margin-value-line {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundPrimary);
+    padding-bottom: 4px;
+  }
+
+  .margin-widget .margin-value-line .mgv-number {
+    font-weight: var(--font-bold);
+  }
+
+  .margin-widget .margin-value-line .mgv-label {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+  }
+
+  .margin-widget .margin-chart-area {
+    flex: 1;
+    min-height: 120px;
+    position: relative;
+  }
+
+  .margin-widget .margin-chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .margin-widget .margin-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .margin-widget .margin-footer .margin-delta {
+    font: var(--font-bold) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--InformationGreen);
+  }
+
+  .margin-widget .margin-legend {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .margin-widget .margin-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .margin-widget .margin-legend .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .margin-widget .margin-footer .margin-ctx {
+    font: var(--font-light) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  /* === PIPELINE WIDGET (Funnel + Bubble) === */
+  .pipeline-widget {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .pipeline-widget .pipe-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .pipeline-widget .pipe-body {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .pipeline-widget .pipe-metrics {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pipeline-widget .pipe-metric {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--InnerLines);
+  }
+
+  .pipeline-widget .pipe-metric:last-child { border-bottom: none; }
+
+  .pipeline-widget .pm-label {
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    white-space: nowrap;
+  }
+
+  .pipeline-widget .pm-value {
+    font: var(--font-bold) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  /* CSS Funnel */
+  .pipeline-widget .pipe-funnel {
+    width: 120px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .pipeline-widget .funnel-stage {
+    height: 20px;
+    border-radius: 3px;
+  }
+
+  /* Bubble chart area */
+  .pipeline-widget .pipe-bubble-area {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  .pipeline-widget .pipe-bubble-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  @media (max-width: 1200px) {
+    .sell-product-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .sell-product-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* =============================================
+     EFFICIENCY SECTION
+     ============================================= */
+  .efficiency-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 1400px) {
+    .efficiency-row { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .efficiency-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Compact KPI widget for 8-col layout */
+  .eff-kpi {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+
+  .eff-kpi .eff-title {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .eff-kpi .eff-value {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .eff-kpi .eff-sub {
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+    text-align: center;
+  }
+
+  .eff-kpi .eff-tertiary {
+    border-top: 1px solid var(--InnerLines);
+    padding-top: 4px;
+    margin-top: auto;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-align: center;
+  }
+
+  .eff-kpi .eff-tertiary .eff-highlight {
+    font-weight: var(--font-bold);
+    color: var(--InformationGreen);
+  }
+
+  .eff-kpi .eff-tertiary .eff-highlight.down { color: var(--InformationRed); }
+  .eff-kpi .eff-tertiary .eff-highlight.flat { color: var(--InformationOrange); }
+
+  /* legacy eff-delta kept for compat */
+  .eff-kpi .eff-delta {
+    font: var(--font-bold) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--InformationGreen);
+  }
+
+  .eff-kpi .eff-delta.down { color: var(--InformationRed); }
+  .eff-kpi .eff-delta.flat { color: var(--InformationOrange); }
+
+  .eff-kpi .eff-chart-area {
+    flex: 1;
+    min-height: 60px;
+    position: relative;
+  }
+
+  .eff-kpi .eff-chart-area canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Progress bar for budget-style KPIs */
+  .eff-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--GaugeBackground);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .eff-progress .eff-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* Mini donut wrapper */
+  .eff-donut-wrap {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .eff-donut-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .eff-donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font: var(--font-bold) var(--size-meta) / var(--lh-meta) var(--default-font);
+    color: var(--ForegroundStrong);
+  }
+
+  /* Score blocks */
+  .eff-score-row {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .eff-score-block {
+    flex: 1;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--GaugeBackground);
+  }
+
+  .eff-score-block.filled { background: var(--GaugeInteraction); }
+
+  /* Cost-to-Pilot widget extras */
+  .eff-kpi .eff-value-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .eff-kpi .eff-value-line .eff-big {
+    font: var(--font-bold) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .eff-kpi .eff-value-line .eff-vs {
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .eff-kpi .eff-section-label {
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    margin-top: 4px;
+  }
+
+  /* Cost breakdown horizontal stacked bars */
+  .cost-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .cost-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .cost-row .cost-label {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    color: var(--GaugeForeground);
+    width: 42px;
+    flex-shrink: 0;
+  }
+
+  .cost-row .cost-bar-track {
+    flex: 1;
+    height: 10px;
+    display: flex;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .cost-row .cost-seg {
+    height: 100%;
+  }
+
+  /* === CHART CARDS === */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .chart-card {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .chart-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .chart-card .card-title {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .chart-card .card-badge {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--MessageDeliveryBackgroundInfo);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .chart-card canvas {
+    width: 100% !important;
+    max-height: 260px;
+  }
+
+  /* === GAUGE RING WIDGETS === */
+  .gauge-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .gauge-card {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .gauge-card canvas {
+    max-width: 150px;
+    max-height: 150px;
+    margin: 0 auto 12px;
+  }
+
+  .gauge-card .gauge-label {
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .gauge-card .gauge-value {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    margin-top: 4px;
+  }
+
+  /* === TABLE WIDGET === */
+  .table-card {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .table-card table { width: 100%; border-collapse: collapse; }
+
+  .table-card th {
+    text-align: left;
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--InnerLines);
+  }
+
+  .table-card td {
+    padding: 12px;
+    font-size: var(--size-default);
+    color: var(--ForegroundPrimary);
+    border-bottom: 1px solid var(--GaugeDataBackground);
+  }
+
+  .table-card tr:last-child td { border-bottom: none; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    text-transform: uppercase;
+  }
+
+  .status-pill.green { background: var(--MessageDeliveryBackgroundOk); color: var(--InformationGreen); }
+  .status-pill.red { background: var(--MessageDeliveryBackgroundCritical); color: var(--InformationRed); }
+  .status-pill.amber { background: var(--MessageDeliveryBackgroundWarning); color: var(--InformationOrange); }
+
+  /* === PROGRESS BARS === */
+  .progress-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .progress-item .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--size-default);
+    margin-bottom: 6px;
+  }
+
+  .progress-item .progress-header .label { color: var(--ForegroundPrimary); }
+  .progress-item .progress-header .pct { color: var(--GaugeForeground); }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--GaugeDataBackground);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar .fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  /* === ACTIVITY FEED === */
+  .activity-feed { display: flex; flex-direction: column; gap: 0; }
+
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--GaugeDataBackground);
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+
+  .activity-text { font-size: var(--size-default); line-height: 1.5; color: var(--GaugeForeground); }
+  .activity-text strong { color: var(--ForegroundStrong); }
+  .activity-time { font-size: var(--size-Sm); color: var(--ForegroundWatermark); margin-top: 2px; }
+
+  /* === TWO COLUMN LAYOUT === */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
+
+  /* === FUNNEL WIDGET === */
+  .funnel-container { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 8px 0; }
+
+  .funnel-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--InformationForegroundAlt);
+    font: var(--font-bold) var(--size-default) / var(--lh-default) var(--default-font);
+    position: relative;
+    transition: opacity 0.2s;
+    cursor: default;
+  }
+
+  .funnel-stage:hover { opacity: 0.85; }
+
+  .funnel-stage .stage-label {
+    position: absolute;
+    left: calc(100%);
+    white-space: nowrap;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    padding-left: 16px;
+  }
+
+  .funnel-stage .stage-count {
+    position: absolute;
+    right: calc(100%);
+    white-space: nowrap;
+    font: var(--font-bold) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--ForegroundStrong);
+    padding-right: 16px;
+  }
+
+  .funnel-kpi-row {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--InnerLines);
+    width: 100%;
+  }
+
+  .funnel-kpi { text-align: center; }
+
+  .funnel-kpi .fk-label {
+    font: var(--font-bold) var(--size-metaSm) / var(--lh-metaSm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .funnel-kpi .fk-value {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    margin-top: 4px;
+  }
+
+  /* === SPEEDOMETER GAUGE === */
+  .speedo-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .speedo-card {
+    background: var(--BackgroundStrong);
+    border: 1px solid var(--InnerLines);
+    border-radius: 8px;
+    padding: 24px 24px 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .speedo-card .speedo-title {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundStrong);
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .speedo-wrap { position: relative; width: 200px; height: 115px; margin: 0 auto; }
+  .speedo-wrap svg { width: 200px; height: 115px; overflow: visible; }
+
+  .speedo-value {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--GaugeValueForeground);
+  }
+
+  .speedo-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    margin: 4px auto 0;
+    font-size: var(--size-Sm);
+    color: var(--GaugeForeground);
+  }
+
+  .speedo-change {
+    margin-top: 12px;
+    font: var(--font-bold) var(--size-default) / var(--lh-default) var(--default-font);
+  }
+
+  .speedo-change.up { color: var(--InformationGreen); }
+  .speedo-change.down { color: var(--InformationRed); }
+
+  @media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- === HEADER WITH THEME SWITCHER === -->
+<div class="dashboard-header">
+  <h1>ASI Executive Dashboard</h1>
+  <div class="theme-switcher">
+    <button class="theme-btn" id="themeToggle" title="Switch theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ForegroundPrimary);">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <div class="theme-menu" id="themeMenu">
+      <div class="theme-menu-header">Theme</div>
+      <!-- Options populated by JS -->
+    </div>
+  </div>
+</div>
+<!-- subtitle hidden -->
+
+<!-- ====== SELL PRODUCT — PRIMARY KPI ROW ====== -->
+<div class="section-label">Sell Product</div>
+<div class="sell-product-row">
+
+  <!-- 1. PDP Progress (Burnup) -->
+  <div class="burnup-widget">
+    <div class="burnup-title">PDP Progress (Burnup)</div>
+    <div class="burnup-value-line">
+      <span class="bv-number">62%</span> <span class="bv-label">PDP Complete</span>
+    </div>
+    <div class="burnup-chart-area">
+      <canvas id="burnupChart"></canvas>
+    </div>
+    <div class="burnup-footer">
+      <div class="burnup-delta">+8 pts ▲</div>
+      <div class="burnup-legend">
+        <div class="legend-item">
+          <div class="legend-line" style="background:var(--GaugeInteraction);"></div>
+          <span style="color:var(--GaugeInteraction);">Actual</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line" style="background:var(--GaugeStatusUnknown);"></div>
+          <span style="color:var(--GaugeForeground);">Plan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Performance (% of Manned) — Gauge -->
+  <div class="gauge-widget">
+    <div class="gauge-header">
+      <div class="gauge-title">Performance vs Manned</div>
+      <svg class="gauge-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+      </svg>
+    </div>
+    <div class="gauge-wrap">
+      <svg id="perfGauge" viewBox="0 0 200 115"></svg>
+      <div class="gauge-value">94%</div>
+    </div>
+    <div class="gauge-labels"><span>60%</span><span>100%</span></div>
+    <div style="flex:1; min-height:0; position:relative; margin-top:4px;">
+      <canvas id="perfSparkline"></canvas>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+      <span style="font:var(--font-bold) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font); color:var(--InformationGreen);">+12 pts</span>
+      <span style="font:var(--font-light) var(--size-default)/var(--lh-default) var(--default-font); color:var(--GaugeForeground);">vs last quarter</span>
+      <span style="color:var(--InformationGreen); font-size:14px;">↗</span>
+    </div>
+  </div>
+
+  <!-- 3. Performance (MTTI) — Area Chart -->
+  <div class="mtti-widget">
+    <div class="mtti-title">MTTI <span class="mtti-sub">(Mean Time to Intervention)</span></div>
+    <div class="mtti-value-line">
+      <span class="mv-number">9.8 min</span> <span class="mv-label">between interventions</span>
+    </div>
+    <div class="mtti-chart-area">
+      <canvas id="mttiChart"></canvas>
+    </div>
+    <div style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); margin-top:4px;">Interventions by Type</div>
+    <div style="height:60px; position:relative;">
+      <canvas id="mttiInterventions"></canvas>
+    </div>
+    <div class="mtti-footer">
+      <span class="mtti-delta">+45 min</span>
+      <span class="mtti-ctx">vs last quarter</span>
+      <span class="mtti-arrow">↗</span>
+    </div>
+  </div>
+
+  <!-- 4. Reliability KPI (Warranty) — Stacked Bar -->
+  <div class="warranty-widget">
+    <div class="warranty-title">Reliability (Warranty)</div>
+    <div class="warranty-value-line">
+      <span class="wv-number">2.4%</span> <span class="wv-label">warranty rate</span>
+    </div>
+    <div class="warranty-chart-area">
+      <canvas id="warrantyChart"></canvas>
+    </div>
+    <div class="warranty-footer">
+      <div class="warranty-delta">-0.8 pts ▼ vs Q3</div>
+      <div class="warranty-legend">
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:var(--InformationOrange);"></div>
+          <span>Claims</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:var(--InformationGreen);"></div>
+          <span>Cost</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:var(--GaugeInteraction);"></div>
+          <span>Units</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Contribution Margin ($/team) — Stacked Vertical Bar -->
+  <div class="margin-widget">
+    <div class="margin-title">Contribution Margin</div>
+    <div class="margin-value-line">
+      <span class="mgv-number">$42K</span> <span class="mgv-label">avg / team</span>
+    </div>
+    <div class="margin-chart-area">
+      <canvas id="marginChart"></canvas>
+    </div>
+    <div class="margin-footer">
+      <span class="margin-delta">+8% vs Q3</span>
+      <div class="margin-legend">
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:var(--GaugeInteraction);"></div>
+          <span>Revenue</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-swatch" style="background:var(--InformationOrange);"></div>
+          <span>Costs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Pipeline (Leads, Size, Probability) — Funnel + Bubble -->
+  <div class="pipeline-widget">
+    <div class="pipe-title">Sales Pipeline</div>
+    <div class="pipe-body">
+      <div class="pipe-metrics">
+        <div class="pipe-metric">
+          <span class="pm-label">Active Leads:</span>
+          <span class="pm-value">42</span>
+        </div>
+        <div class="pipe-metric">
+          <span class="pm-label">Pipeline Value:</span>
+          <span class="pm-value">$5.4M</span>
+        </div>
+        <div class="pipe-metric">
+          <span class="pm-label">Win Probability:</span>
+          <span class="pm-value">35%</span>
+        </div>
+      </div>
+      <div class="pipe-funnel">
+        <div class="funnel-stage" style="width:100%; background:var(--InformationBlue);"></div>
+        <div class="funnel-stage" style="width:80%; background:var(--InformationYellow);"></div>
+        <div class="funnel-stage" style="width:60%; background:var(--InformationGreen);"></div>
+        <div class="funnel-stage" style="width:40%; background:var(--ForegroundStrong);"></div>
+        <div class="funnel-stage" style="width:25%; background:var(--InformationRed);"></div>
+      </div>
+    </div>
+    <div class="pipe-bubble-area">
+      <canvas id="pipelineBubble"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====== EFFICIENCY — KPI ROW ====== -->
+<div class="section-label">Efficiency</div>
+<div class="efficiency-row">
+
+  <!-- 1. Development Cost to Pilot -->
+  <div class="eff-kpi">
+    <div class="eff-title">Dev Cost to Pilot</div>
+    <div class="eff-value-line">
+      <span class="eff-big">$750k</span>
+      <span class="eff-vs">vs Target: $800k</span>
+    </div>
+    <div class="eff-section-label">Cumulative Cost to Pilot</div>
+    <div class="eff-chart-area" style="flex:1; min-height:0;">
+      <canvas id="effCostArea"></canvas>
+    </div>
+    <div class="eff-section-label">Cost Breakdown</div>
+    <div class="cost-breakdown">
+      <div class="cost-row">
+        <span class="cost-label">Labor</span>
+        <div class="cost-bar-track">
+          <div class="cost-seg" style="width:52%; background:var(--InformationBlue);"></div>
+          <div class="cost-seg" style="width:18%; background:var(--InformationYellow);"></div>
+          <div class="cost-seg" style="width:12%; background:var(--GaugeForeground);"></div>
+          <div class="cost-seg" style="width:10%; background:var(--ForegroundStrong);"></div>
+          <div class="cost-seg" style="width:8%; background:var(--ForegroundAction);"></div>
+        </div>
+      </div>
+      <div class="cost-row">
+        <span class="cost-label">Hardware</span>
+        <div class="cost-bar-track">
+          <div class="cost-seg" style="width:65%; background:var(--InformationGreen);"></div>
+          <div class="cost-seg" style="width:15%; background:var(--InformationYellow);"></div>
+          <div class="cost-seg" style="width:10%; background:var(--GaugeForeground);"></div>
+          <div class="cost-seg" style="width:10%; background:var(--ForegroundAction);"></div>
+        </div>
+      </div>
+      <div class="cost-row">
+        <span class="cost-label">Other</span>
+        <div class="cost-bar-track">
+          <div class="cost-seg" style="width:30%; background:var(--InformationGreen);"></div>
+          <div class="cost-seg" style="width:70%; background:var(--GaugeBackground);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. % of AI-Generated Code -->
+  <div class="eff-kpi">
+    <div class="eff-title">AI-Generated Code</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <div style="font: var(--font-thin) 80px/1 var(--header-font); color:var(--ForegroundStrong);">62%</div>
+      <div style="color:var(--InformationGreen); font-size:var(--size-hdrLg); line-height:1;">&#x2B06;</div>
+    </div>
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="effAiCodeSparkline"></canvas>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">55%</span></div>
+  </div>
+
+  <!-- 3. AI Generated Test Cases -->
+  <div class="eff-kpi">
+    <div class="eff-title">AI Generated Test Cases</div>
+    <div class="eff-value-line">
+      <span class="eff-big">320</span>
+      <span class="eff-vs">/ 540 total</span>
+    </div>
+    <!-- Thick progress bar -->
+    <div style="display:flex; height:16px; border-radius:4px; overflow:hidden; margin:4px 0;">
+      <div style="width:59%; background:var(--GaugeInteraction);"></div>
+      <div style="width:41%; background:var(--InnerLines);"></div>
+    </div>
+    <!-- Legend + percentage -->
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <span style="display:flex; align-items:center; gap:4px; font:var(--font-bold) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--ForegroundPrimary);"><span style="width:8px;height:8px;border-radius:50%;background:var(--GaugeInteraction);display:inline-block;"></span>AI-assisted</span>
+        <span style="display:flex; align-items:center; gap:4px; font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground);"><span style="width:8px;height:8px;border-radius:50%;background:var(--InnerLines);display:inline-block;"></span>Other</span>
+      </div>
+      <span style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font); color:var(--GaugeForeground);">32%</span>
+    </div>
+    <!-- Sparkline full width, fills remaining space -->
+    <div style="flex:1; min-height:0; position:relative; width:100%;">
+      <canvas id="effTestSparkline"></canvas>
+    </div>
+    <div class="eff-tertiary"><span style="color:var(--InformationBlue);">&#x2191; 51%</span> <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground);">test coverage</span></div>
+  </div>
+
+  <!-- 4. Install Time -->
+  <div class="eff-kpi">
+    <div class="eff-title">Install Time</div>
+    <div class="eff-value-line">
+      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">6.2</span>
+      <span class="eff-vs">days</span>
+      <span class="eff-vs" style="margin-left:4px;">Avg Install Time</span>
+    </div>
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="effInstallChart"></canvas>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">5.0 days</span></div>
+  </div>
+
+  <!-- 5. Kit Build Time -->
+  <div class="eff-kpi">
+    <div class="eff-title">Kit Build Time</div>
+    <div class="eff-value-line">
+      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">18</span>
+      <span class="eff-vs">hrs</span>
+      <span class="eff-vs" style="margin-left:4px;">Avg Build Time</span>
+    </div>
+    <!-- Per-kit bar chart -->
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="effBuildBars"></canvas>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">16 hrs</span></div>
+  </div>
+
+  <!-- 6. Dev Cost to Phase 6 -->
+  <div class="eff-kpi">
+    <div class="eff-title">Dev Cost to Phase 6</div>
+    <div class="eff-value-line">
+      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">$2.4M</span>
+      <span class="eff-vs">Cost to Phase 6</span>
+    </div>
+    <div class="eff-section-label">Cost vs Budget</div>
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="effCostPhase6"></canvas>
+    </div>
+    <!-- Legend -->
+    <div style="display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:4px;">
+      <span style="display:flex; align-items:center; gap:3px; font:var(--font-bold) var(--size-metaSm)/var(--lh-metaSm) var(--default-font); color:var(--GaugeForeground);"><span style="width:8px;height:8px;border-radius:2px;background:var(--InformationBlue);display:inline-block;"></span>Actual</span>
+      <span style="display:flex; align-items:center; gap:3px; font:var(--font-bold) var(--size-metaSm)/var(--lh-metaSm) var(--default-font); color:var(--GaugeForeground);"><span style="width:8px;height:8px;border-radius:2px;background:var(--InformationYellow);display:inline-block;"></span>Budget</span>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">$3.0M</span></div>
+  </div>
+
+  <!-- 7. BOM Reduction of Cost -->
+  <div class="eff-kpi">
+    <div class="eff-title">BOM Reduction of Cost</div>
+    <div class="eff-value-line">
+      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--InformationGreen);">-18%</span>
+      <span class="eff-vs">$42K saved / kit</span>
+    </div>
+    <div class="eff-section-label">BOM Cost per Unit ($K)</div>
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="effBomReduction"></canvas>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">-25%</span></div>
+  </div>
+
+  <!-- 8. Extensible Kit -->
+  <div class="eff-kpi">
+    <div class="eff-title">Extensible Kit</div>
+    <div class="eff-value-line">
+      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">7 / 10</span>
+      <span class="eff-vs">Configs</span>
+    </div>
+    <!-- Doughnut chart for reuse rate -->
+    <div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; position:relative;">
+      <canvas id="effExtensibleDonut"></canvas>
+      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+        <div style="font:var(--font-bold) var(--size-hdrMd)/var(--lh-hdrMd) var(--header-font); color:var(--ForegroundStrong);">72%</div>
+        <div style="font:var(--font-normal) var(--size-metaSm)/var(--lh-metaSm) var(--default-font); color:var(--GaugeForeground);">reuse rate</div>
+      </div>
+    </div>
+    <!-- Config coverage bar -->
+    <div style="display:flex; gap:3px;">
+      <div style="flex:7; height:18px; border-radius:3px; background:var(--InformationBlue);"></div>
+      <div style="flex:3; height:18px; border-radius:3px; background:var(--InnerLines);"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font:var(--font-normal) var(--size-metaSm)/var(--lh-metaSm) var(--default-font); color:var(--GaugeForeground);">
+      <span>7 supported</span>
+      <span>3 remaining</span>
+    </div>
+    <div class="eff-tertiary">Target: <span class="eff-highlight">9 / 10</span></div>
+  </div>
+
+</div>
+
+<!-- ====== KPI CARDS ====== -->
+<div class="section-label">KPI Summary Cards</div>
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="icon" style="background:var(--MessageDeliveryBackgroundInfo);color:var(--ForegroundAction);">$</div>
+    <div class="label">Total Revenue</div>
+    <div class="value">$2.4M</div>
+    <div class="change up">▲ 12.5% vs last quarter</div>
+  </div>
+  <div class="kpi-card">
+    <div class="icon" style="background:var(--MessageDeliveryBackgroundOk);color:var(--InformationGreen);">✓</div>
+    <div class="label">Active Clients</div>
+    <div class="value">1,284</div>
+    <div class="change up">▲ 8.3% vs last quarter</div>
+  </div>
+  <div class="kpi-card">
+    <div class="icon" style="background:var(--MessageDeliveryBackgroundWarning);color:var(--InformationOrange);">⏱</div>
+    <div class="label">Avg. Response Time</div>
+    <div class="value">2.4h</div>
+    <div class="change down">▼ 15% vs last quarter</div>
+  </div>
+  <div class="kpi-card">
+    <div class="icon" style="background:var(--MessageDeliveryBackgroundCritical);color:var(--InformationRed);">★</div>
+    <div class="label">NPS Score</div>
+    <div class="value">72</div>
+    <div class="change up">▲ 4 pts vs last quarter</div>
+  </div>
+</div>
+
+<!-- ====== CHARTS ====== -->
+<div class="section-label">Charts &amp; Trends</div>
+<div class="chart-grid">
+  <div class="chart-card"><div class="card-header"><div class="card-title">Revenue Trend</div><div class="card-badge">Monthly</div></div><canvas id="lineChart"></canvas></div>
+  <div class="chart-card"><div class="card-header"><div class="card-title">Revenue by Segment</div><div class="card-badge">Q4 2025</div></div><canvas id="barChart"></canvas></div>
+</div>
+<div class="chart-grid" style="margin-top:16px;">
+  <div class="chart-card"><div class="card-header"><div class="card-title">Budget Allocation</div><div class="card-badge">FY 2026</div></div><canvas id="doughnutChart" style="max-height:240px;"></canvas></div>
+  <div class="chart-card"><div class="card-header"><div class="card-title">Dept. Performance Radar</div><div class="card-badge">Current</div></div><canvas id="radarChart" style="max-height:240px;"></canvas></div>
+</div>
+
+<!-- ====== GAUGES ====== -->
+<div class="section-label">Gauge / Ring Widgets</div>
+<div class="gauge-row">
+  <div class="gauge-card"><canvas id="gauge1"></canvas><div class="gauge-label">Customer Satisfaction</div><div class="gauge-value" style="color:var(--InformationGreen);">92%</div></div>
+  <div class="gauge-card"><canvas id="gauge2"></canvas><div class="gauge-label">SLA Compliance</div><div class="gauge-value" style="color:var(--ForegroundAction);">87%</div></div>
+  <div class="gauge-card"><canvas id="gauge3"></canvas><div class="gauge-label">Budget Utilization</div><div class="gauge-value" style="color:var(--InformationOrange);">68%</div></div>
+  <div class="gauge-card"><canvas id="gauge4"></canvas><div class="gauge-label">Project Completion</div><div class="gauge-value" style="color:var(--InformationPurple);">74%</div></div>
+</div>
+
+<!-- ====== SPEEDOMETERS ====== -->
+<div class="section-label">Speedometer Gauges</div>
+<div class="speedo-row">
+  <div class="speedo-card">
+    <div class="speedo-title">Performance vs Manned</div>
+    <div class="speedo-wrap"><svg id="speedo1" viewBox="0 0 200 115"></svg><div class="speedo-value">94%</div></div>
+    <div class="speedo-labels"><span>60%</span><span>100%</span></div>
+    <div class="speedo-change up">+12 pts vs last quarter</div>
+  </div>
+  <div class="speedo-card">
+    <div class="speedo-title">Fleet Utilization</div>
+    <div class="speedo-wrap"><svg id="speedo2" viewBox="0 0 200 115"></svg><div class="speedo-value">78%</div></div>
+    <div class="speedo-labels"><span>0%</span><span>100%</span></div>
+    <div class="speedo-change up">+5 pts vs last quarter</div>
+  </div>
+  <div class="speedo-card">
+    <div class="speedo-title">SLA Compliance</div>
+    <div class="speedo-wrap"><svg id="speedo3" viewBox="0 0 200 115"></svg><div class="speedo-value">91%</div></div>
+    <div class="speedo-labels"><span>50%</span><span>100%</span></div>
+    <div class="speedo-change down">-3 pts vs last quarter</div>
+  </div>
+  <div class="speedo-card">
+    <div class="speedo-title">Autonomous Uptime</div>
+    <div class="speedo-wrap"><svg id="speedo4" viewBox="0 0 200 115"></svg><div class="speedo-value">87%</div></div>
+    <div class="speedo-labels"><span>60%</span><span>100%</span></div>
+    <div class="speedo-change up">+8 pts vs last quarter</div>
+  </div>
+</div>
+
+<!-- ====== FUNNEL + BUBBLE ====== -->
+<div class="section-label">Sales Pipeline &mdash; Funnel &amp; Bubble Chart</div>
+<div class="chart-grid">
+  <div class="chart-card">
+    <div class="card-header"><div class="card-title">Sales Pipeline</div><div class="card-badge">Current Quarter</div></div>
+    <div class="funnel-container">
+      <div class="funnel-stage" style="width:100%;height:44px;background:var(--InformationBlue);border-radius:6px 6px 0 0;clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);"><span class="stage-count">248</span>Leads<span class="stage-label">Top of Funnel</span></div>
+      <div class="funnel-stage" style="width:85%;height:44px;background:var(--InformationYellow);clip-path:polygon(0% 0%, 100% 0%, 94% 100%, 6% 100%);"><span class="stage-count">142</span>Qualified<span class="stage-label">57% conversion</span></div>
+      <div class="funnel-stage" style="width:68%;height:44px;background:var(--InformationGreen);clip-path:polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%);"><span class="stage-count">68</span>Proposal<span class="stage-label">48% conversion</span></div>
+      <div class="funnel-stage" style="width:50%;height:44px;background:var(--InformationOrange);clip-path:polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);"><span class="stage-count">42</span>Negotiation<span class="stage-label">62% conversion</span></div>
+      <div class="funnel-stage" style="width:32%;height:44px;background:var(--InformationRed);border-radius:0 0 6px 6px;clip-path:polygon(0% 0%, 100% 0%, 85% 100%, 15% 100%);"><span class="stage-count">18</span>Closed Won<span class="stage-label">43% conversion</span></div>
+    </div>
+    <div class="funnel-kpi-row">
+      <div class="funnel-kpi"><div class="fk-label">Active Leads</div><div class="fk-value" style="color:var(--ForegroundAction);">42</div></div>
+      <div class="funnel-kpi"><div class="fk-label">Pipeline Value</div><div class="fk-value" style="color:var(--InformationGreen);">$5.4M</div></div>
+      <div class="funnel-kpi"><div class="fk-label">Win Rate</div><div class="fk-value" style="color:var(--InformationOrange);">35%</div></div>
+    </div>
+  </div>
+  <div class="chart-card"><div class="card-header"><div class="card-title">Deal Landscape</div><div class="card-badge">Bubble = Revenue</div></div><canvas id="bubbleChart"></canvas></div>
+</div>
+
+<!-- ====== TABLE + PROGRESS + ACTIVITY ====== -->
+<div class="section-label">Tables, Progress Bars &amp; Activity Feed</div>
+<div class="two-col">
+  <div class="table-card">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);">Project Status</div>
+      <div class="card-badge" style="font:var(--font-bold) var(--size-metaSm)/var(--lh-metaSm) var(--default-font);padding:4px 10px;border-radius:20px;background:var(--MessageDeliveryBackgroundInfo);color:var(--ForegroundAction);text-transform:uppercase;">6 Active</div>
+    </div>
+    <table>
+      <thead><tr><th>Project</th><th>Owner</th><th>Status</th><th>Budget</th></tr></thead>
+      <tbody>
+        <tr><td>Platform Migration</td><td>J. Chen</td><td><span class="status-pill green">On Track</span></td><td>$420K</td></tr>
+        <tr><td>CRM Integration</td><td>S. Patel</td><td><span class="status-pill amber">At Risk</span></td><td>$185K</td></tr>
+        <tr><td>Data Warehouse</td><td>M. Torres</td><td><span class="status-pill green">On Track</span></td><td>$310K</td></tr>
+        <tr><td>Mobile App v3</td><td>R. Kim</td><td><span class="status-pill red">Delayed</span></td><td>$275K</td></tr>
+        <tr><td>Security Audit</td><td>A. Novak</td><td><span class="status-pill green">On Track</span></td><td>$95K</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="chart-card">
+      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);margin-bottom:16px;">Q1 OKR Progress</div>
+      <div class="progress-list">
+        <div class="progress-item"><div class="progress-header"><span class="label">Revenue Target</span><span class="pct">82%</span></div><div class="progress-bar"><div class="fill" style="width:82%;background:var(--InformationGreen);"></div></div></div>
+        <div class="progress-item"><div class="progress-header"><span class="label">Customer Acquisition</span><span class="pct">65%</span></div><div class="progress-bar"><div class="fill" style="width:65%;background:var(--ForegroundAction);"></div></div></div>
+        <div class="progress-item"><div class="progress-header"><span class="label">Product Launches</span><span class="pct">40%</span></div><div class="progress-bar"><div class="fill" style="width:40%;background:var(--InformationOrange);"></div></div></div>
+        <div class="progress-item"><div class="progress-header"><span class="label">Employee Engagement</span><span class="pct">91%</span></div><div class="progress-bar"><div class="fill" style="width:91%;background:var(--InformationPurple);"></div></div></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);margin-bottom:12px;">Recent Activity</div>
+      <div class="activity-feed">
+        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationGreen);"></div><div><div class="activity-text"><strong>CRM Integration</strong> milestone completed — Phase 2 data sync live</div><div class="activity-time">2 hours ago</div></div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationRed);"></div><div><div class="activity-text"><strong>Mobile App v3</strong> deadline pushed to Mar 28 — vendor dependency</div><div class="activity-time">5 hours ago</div></div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--ForegroundAction);"></div><div><div class="activity-text"><strong>Budget review</strong> scheduled for Friday — Q2 allocation draft ready</div><div class="activity-time">Yesterday</div></div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationPurple);"></div><div><div class="activity-text"><strong>NPS Score</strong> hit 72 — highest in 4 quarters</div><div class="activity-time">2 days ago</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:32px 0 16px;color:var(--GaugeForeground);font-size:var(--size-Sm);">
+  Mobius Design System — All widgets dynamically populated from Excel via SheetJS
+</div>
+
+<script>
+// =============================================
+// MOBIUS THEME DEFINITIONS
+// =============================================
+const THEMES = {
+  light: {
+    name: 'Light',
+    swatches: ['#f5f5f5','#ffffff','#0075a1','#92d400','#e02333'],
+    vars: {
+      '--ForegroundPrimary': 'rgba(85, 85, 85, 1)',
+      '--ForegroundStrong': 'rgba(0, 43, 69, 1)',
+      '--ForegroundDisabled': 'rgba(205, 205, 205, 1)',
+      '--ForegroundWatermark': 'rgba(196, 196, 196, 1)',
+      '--ForegroundAction': 'rgba(0, 117, 161, 1)',
+      '--BackgroundPrimary': 'rgba(245, 245, 245, 1)',
+      '--BackgroundStrong': 'rgba(255, 255, 255, 1)',
+      '--BackgroundStrongStepOne': 'rgba(240, 240, 240, 1)',
+      '--BackgroundStepOne': 'rgba(251, 251, 249, 1)',
+      '--BackgroundStepTwo': 'rgba(246, 246, 246, 1)',
+      '--InnerLines': 'rgba(224, 230, 230, 1)',
+      '--ShadowElements': 'rgba(0, 0, 0, 0.133)',
+      '--MouseOverBackground': 'rgba(233, 233, 233, 1)',
+      '--SelectionPrimary': 'rgba(0, 159, 218, 1)',
+      '--InformationBlue': 'rgba(0, 159, 218, 1)',
+      '--InformationGreen': 'rgba(146, 212, 0, 1)',
+      '--InformationYellow': 'rgba(254, 209, 0, 1)',
+      '--InformationOrange': 'rgba(255, 128, 0, 1)',
+      '--InformationRed': 'rgba(230, 35, 51, 1)',
+      '--InformationPurple': 'rgba(196, 153, 247, 1)',
+      '--InformationGray': 'rgba(112, 112, 112, 1)',
+      '--InformationForegroundAlt': 'rgba(255, 255, 255, 1)',
+      '--MessageDeliveryBackgroundInfo': 'rgba(215, 237, 247, 1)',
+      '--MessageDeliveryBackgroundOk': 'rgba(230, 242, 227, 1)',
+      '--MessageDeliveryBackgroundCritical': 'rgba(248, 237, 238, 1)',
+      '--MessageDeliveryBackgroundWarning': 'rgba(255, 239, 223, 1)',
+      '--GaugeBackground': 'rgba(255, 255, 253, 1)',
+      '--GaugeForeground': 'rgba(118, 118, 118, 1)',
+      '--GaugeValueForeground': 'rgba(0, 43, 69, 1)',
+      '--GaugeDataBackground': 'rgba(244, 244, 244, 1)',
+      '--GaugeDataTick': 'rgba(224, 230, 230, 1)',
+      '--GaugeStatusOK': 'rgba(146, 212, 0, 1)',
+      '--GaugeStatusWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeStatusCritical': 'rgba(230, 35, 51, 1)',
+      '--GaugeInteraction': 'rgba(0, 159, 218, 1)',
+    }
+  },
+  dark: {
+    name: 'Dark',
+    swatches: ['#1c1c1c','#2d2d2d','#009fda','#92d400','#e62333'],
+    vars: {
+      '--ForegroundPrimary': 'rgba(223, 229, 229, 1)',
+      '--ForegroundStrong': 'rgba(255, 255, 255, 1)',
+      '--ForegroundDisabled': 'rgba(143, 143, 143, 1)',
+      '--ForegroundWatermark': 'rgba(140, 140, 140, 1)',
+      '--ForegroundAction': 'rgba(0, 159, 218, 1)',
+      '--BackgroundPrimary': 'rgba(28, 28, 28, 1)',
+      '--BackgroundStrong': 'rgba(22, 22, 22, 1)',
+      '--BackgroundStrongStepOne': 'rgba(34, 34, 34, 1)',
+      '--BackgroundStepOne': 'rgba(45, 45, 45, 1)',
+      '--BackgroundStepTwo': 'rgba(32, 32, 32, 1)',
+      '--InnerLines': 'rgba(68, 68, 68, 0.6)',
+      '--ShadowElements': 'rgba(0, 0, 0, 1)',
+      '--MouseOverBackground': 'rgba(6, 6, 6, 1)',
+      '--SelectionPrimary': 'rgba(0, 126, 174, 1)',
+      '--InformationBlue': 'rgba(30, 193, 255, 1)',
+      '--InformationGreen': 'rgba(146, 212, 0, 1)',
+      '--InformationYellow': 'rgba(254, 209, 0, 1)',
+      '--InformationOrange': 'rgba(255, 128, 0, 1)',
+      '--InformationRed': 'rgba(237, 41, 57, 1)',
+      '--InformationPurple': 'rgba(196, 153, 247, 1)',
+      '--InformationGray': 'rgba(169, 169, 169, 1)',
+      '--InformationForegroundAlt': 'rgba(255, 255, 255, 1)',
+      '--MessageDeliveryBackgroundInfo': 'rgba(10, 14, 19, 1)',
+      '--MessageDeliveryBackgroundOk': 'rgba(17, 22, 17, 1)',
+      '--MessageDeliveryBackgroundCritical': 'rgba(31, 17, 17, 1)',
+      '--MessageDeliveryBackgroundWarning': 'rgba(37, 25, 11, 1)',
+      '--GaugeBackground': 'rgba(47, 47, 47, 1)',
+      '--GaugeForeground': 'rgba(223, 229, 229, 1)',
+      '--GaugeValueForeground': 'rgba(255, 255, 255, 1)',
+      '--GaugeDataBackground': 'rgba(32, 32, 32, 1)',
+      '--GaugeDataTick': 'rgba(68, 68, 68, 0.6)',
+      '--GaugeStatusOK': 'rgba(146, 212, 0, 1)',
+      '--GaugeStatusWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeStatusCritical': 'rgba(230, 35, 51, 1)',
+      '--GaugeInteraction': 'rgba(0, 159, 218, 1)',
+    }
+  },
+  blackout: {
+    name: 'Blackout',
+    swatches: ['#050709','#080e13','#5bd2ff','#92d400','#ed2939'],
+    vars: {
+      '--ForegroundPrimary': 'rgba(223, 229, 229, 1)',
+      '--ForegroundStrong': 'rgba(255, 255, 255, 1)',
+      '--ForegroundDisabled': 'rgba(143, 143, 143, 1)',
+      '--ForegroundWatermark': 'rgba(140, 140, 140, 1)',
+      '--ForegroundAction': 'rgba(0, 159, 218, 1)',
+      '--BackgroundPrimary': 'rgba(5, 7, 9, 1)',
+      '--BackgroundStrong': 'rgba(0, 0, 0, 1)',
+      '--BackgroundStrongStepOne': 'rgba(1, 2, 3, 1)',
+      '--BackgroundStepOne': 'rgba(8, 14, 19, 1)',
+      '--BackgroundStepTwo': 'rgba(8, 14, 19, 1)',
+      '--InnerLines': 'rgba(65, 75, 85, 0.6)',
+      '--ShadowElements': 'rgba(0, 0, 0, 1)',
+      '--MouseOverBackground': 'rgba(31, 31, 31, 1)',
+      '--SelectionPrimary': 'rgba(0, 126, 174, 1)',
+      '--InformationBlue': 'rgba(91, 210, 255, 1)',
+      '--InformationGreen': 'rgba(146, 212, 0, 1)',
+      '--InformationYellow': 'rgba(254, 209, 0, 1)',
+      '--InformationOrange': 'rgba(255, 128, 0, 1)',
+      '--InformationRed': 'rgba(237, 41, 57, 1)',
+      '--InformationPurple': 'rgba(196, 153, 247, 1)',
+      '--InformationGray': 'rgba(169, 169, 169, 1)',
+      '--InformationForegroundAlt': 'rgba(255, 255, 255, 1)',
+      '--MessageDeliveryBackgroundInfo': 'rgba(10, 14, 19, 1)',
+      '--MessageDeliveryBackgroundOk': 'rgba(17, 22, 17, 1)',
+      '--MessageDeliveryBackgroundCritical': 'rgba(31, 17, 17, 1)',
+      '--MessageDeliveryBackgroundWarning': 'rgba(37, 25, 11, 1)',
+      '--GaugeBackground': 'rgba(47, 47, 47, 1)',
+      '--GaugeForeground': 'rgba(223, 229, 229, 1)',
+      '--GaugeValueForeground': 'rgba(255, 255, 255, 1)',
+      '--GaugeDataBackground': 'rgba(8, 14, 19, 1)',
+      '--GaugeDataTick': 'rgba(65, 75, 85, 0.6)',
+      '--GaugeStatusOK': 'rgba(146, 212, 0, 1)',
+      '--GaugeStatusWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeStatusCritical': 'rgba(230, 35, 51, 1)',
+      '--GaugeInteraction': 'rgba(0, 126, 174, 1)',
+    }
+  },
+  blue: {
+    name: 'Blue',
+    swatches: ['#f4f4f4','#ffffff','#009fda','#92d400','#ef4d3a'],
+    vars: {
+      '--ForegroundPrimary': 'rgba(51, 51, 51, 1)',
+      '--ForegroundStrong': 'rgba(34, 34, 34, 1)',
+      '--ForegroundDisabled': 'rgba(102, 102, 102, 1)',
+      '--ForegroundWatermark': 'rgba(187, 187, 187, 1)',
+      '--ForegroundAction': 'rgba(0, 159, 218, 1)',
+      '--BackgroundPrimary': 'rgba(244, 244, 244, 1)',
+      '--BackgroundStrong': 'rgba(255, 255, 255, 1)',
+      '--BackgroundStrongStepOne': 'rgba(238, 238, 238, 1)',
+      '--BackgroundStepOne': 'rgba(255, 255, 255, 1)',
+      '--BackgroundStepTwo': 'rgba(238, 238, 238, 1)',
+      '--InnerLines': 'rgba(187, 187, 187, 1)',
+      '--ShadowElements': 'rgba(0, 0, 0, 0.133)',
+      '--MouseOverBackground': 'rgba(233, 233, 233, 1)',
+      '--SelectionPrimary': 'rgba(0, 159, 218, 1)',
+      '--InformationBlue': 'rgba(91, 210, 255, 1)',
+      '--InformationGreen': 'rgba(146, 212, 0, 1)',
+      '--InformationYellow': 'rgba(254, 209, 0, 1)',
+      '--InformationOrange': 'rgba(255, 128, 0, 1)',
+      '--InformationRed': 'rgba(239, 77, 58, 1)',
+      '--InformationPurple': 'rgba(196, 153, 247, 1)',
+      '--InformationGray': 'rgba(112, 112, 112, 1)',
+      '--InformationForegroundAlt': 'rgba(255, 255, 255, 1)',
+      '--MessageDeliveryBackgroundInfo': 'rgba(215, 237, 247, 1)',
+      '--MessageDeliveryBackgroundOk': 'rgba(230, 242, 227, 1)',
+      '--MessageDeliveryBackgroundCritical': 'rgba(248, 237, 238, 1)',
+      '--MessageDeliveryBackgroundWarning': 'rgba(255, 239, 223, 1)',
+      '--GaugeBackground': 'rgba(255, 255, 253, 1)',
+      '--GaugeForeground': 'rgba(112, 112, 112, 1)',
+      '--GaugeValueForeground': 'rgba(0, 43, 69, 1)',
+      '--GaugeDataBackground': 'rgba(244, 244, 244, 1)',
+      '--GaugeDataTick': 'rgba(187, 187, 187, 1)',
+      '--GaugeStatusOK': 'rgba(146, 212, 0, 1)',
+      '--GaugeStatusWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeStatusCritical': 'rgba(230, 35, 51, 1)',
+      '--GaugeInteraction': 'rgba(0, 159, 218, 1)',
+    }
+  },
+  sunlight: {
+    name: 'Sunlight',
+    swatches: ['#f5f5f5','#ffffff','#006991','#92d400','#e62333'],
+    vars: {
+      '--ForegroundPrimary': 'rgba(11, 11, 11, 1)',
+      '--ForegroundStrong': 'rgba(0, 0, 0, 1)',
+      '--ForegroundDisabled': 'rgba(119, 119, 119, 1)',
+      '--ForegroundWatermark': 'rgba(0, 0, 0, 1)',
+      '--ForegroundAction': 'rgba(0, 105, 145, 1)',
+      '--BackgroundPrimary': 'rgba(245, 245, 245, 1)',
+      '--BackgroundStrong': 'rgba(255, 255, 255, 1)',
+      '--BackgroundStrongStepOne': 'rgba(224, 224, 224, 1)',
+      '--BackgroundStepOne': 'rgba(245, 245, 245, 1)',
+      '--BackgroundStepTwo': 'rgba(227, 227, 227, 1)',
+      '--InnerLines': 'rgba(187, 187, 187, 1)',
+      '--ShadowElements': 'rgba(0, 0, 0, 0.2)',
+      '--MouseOverBackground': 'rgba(233, 233, 233, 1)',
+      '--SelectionPrimary': 'rgba(0, 105, 145, 1)',
+      '--InformationBlue': 'rgba(0, 159, 218, 1)',
+      '--InformationGreen': 'rgba(146, 212, 0, 1)',
+      '--InformationYellow': 'rgba(224, 167, 0, 1)',
+      '--InformationOrange': 'rgba(255, 128, 0, 1)',
+      '--InformationRed': 'rgba(230, 35, 51, 1)',
+      '--InformationPurple': 'rgba(196, 153, 247, 1)',
+      '--InformationGray': 'rgba(112, 112, 112, 1)',
+      '--InformationForegroundAlt': 'rgba(255, 255, 255, 1)',
+      '--MessageDeliveryBackgroundInfo': 'rgba(0, 105, 145, 1)',
+      '--MessageDeliveryBackgroundOk': 'rgba(146, 212, 0, 1)',
+      '--MessageDeliveryBackgroundCritical': 'rgba(255, 0, 0, 1)',
+      '--MessageDeliveryBackgroundWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeBackground': 'rgba(245, 245, 245, 1)',
+      '--GaugeForeground': 'rgba(11, 11, 11, 1)',
+      '--GaugeValueForeground': 'rgba(0, 0, 0, 1)',
+      '--GaugeDataBackground': 'rgba(187, 187, 187, 1)',
+      '--GaugeDataTick': 'rgba(187, 187, 187, 1)',
+      '--GaugeStatusOK': 'rgba(146, 212, 0, 1)',
+      '--GaugeStatusWarning': 'rgba(255, 128, 0, 1)',
+      '--GaugeStatusCritical': 'rgba(230, 35, 51, 1)',
+      '--GaugeInteraction': 'rgba(0, 105, 145, 1)',
+    }
+  }
+};
+
+// =============================================
+// THEME ENGINE
+// =============================================
+let currentTheme = 'light';
+let chartInstances = {};
+
+function getMobius() {
+  const cs = getComputedStyle(document.documentElement);
+  return {
+    fgPrimary:     cs.getPropertyValue('--ForegroundPrimary').trim(),
+    fgStrong:      cs.getPropertyValue('--ForegroundStrong').trim(),
+    gaugeFg:       cs.getPropertyValue('--GaugeForeground').trim(),
+    action:        cs.getPropertyValue('--ForegroundAction').trim(),
+    infoBlue:      cs.getPropertyValue('--InformationBlue').trim(),
+    green:         cs.getPropertyValue('--InformationGreen').trim(),
+    yellow:        cs.getPropertyValue('--InformationYellow').trim(),
+    orange:        cs.getPropertyValue('--InformationOrange').trim(),
+    red:           cs.getPropertyValue('--InformationRed').trim(),
+    purple:        cs.getPropertyValue('--InformationPurple').trim(),
+    innerLines:    cs.getPropertyValue('--InnerLines').trim(),
+    gaugeDataBg:   cs.getPropertyValue('--GaugeDataBackground').trim(),
+    gaugeBg:       cs.getPropertyValue('--GaugeBackground').trim(),
+    gaugeOK:       cs.getPropertyValue('--GaugeStatusOK').trim(),
+    gaugeWarn:     cs.getPropertyValue('--GaugeStatusWarning').trim(),
+    gaugeCrit:     cs.getPropertyValue('--GaugeStatusCritical').trim(),
+    gaugeInteract: cs.getPropertyValue('--GaugeInteraction').trim(),
+  };
+}
+
+function applyTheme(themeKey) {
+  const theme = THEMES[themeKey];
+  if (!theme) return;
+  const root = document.documentElement;
+  Object.entries(theme.vars).forEach(([prop, val]) => {
+    root.style.setProperty(prop, val);
+  });
+  currentTheme = themeKey;
+  updateMenuState();
+  rebuildAllCharts();
+}
+
+function updateMenuState() {
+  document.querySelectorAll('.theme-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.theme === currentTheme);
+  });
+}
+
+// =============================================
+// THEME MENU UI
+// =============================================
+function buildThemeMenu() {
+  const menu = document.getElementById('themeMenu');
+  Object.entries(THEMES).forEach(([key, theme]) => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-option' + (key === currentTheme ? ' active' : '');
+    btn.dataset.theme = key;
+    btn.innerHTML = `
+      <div class="theme-swatch">${theme.swatches.map(c => `<span style="background:${c}"></span>`).join('')}</div>
+      ${theme.name}
+      <span class="check">&#10003;</span>
+    `;
+    btn.addEventListener('click', () => {
+      applyTheme(key);
+      menu.classList.remove('open');
+    });
+    menu.appendChild(btn);
+  });
+}
+
+document.getElementById('themeToggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('themeMenu').classList.toggle('open');
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('themeMenu').classList.remove('open');
+});
+
+document.getElementById('themeMenu').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+// =============================================
+// CHART BUILDERS
+// =============================================
+function destroyAllCharts() {
+  Object.values(chartInstances).forEach(c => { if (c && c.destroy) c.destroy(); });
+  chartInstances = {};
+  // Clear speedometer SVGs
+  ['speedo1','speedo2','speedo3','speedo4','perfGauge'].forEach(id => {
+    const svg = document.getElementById(id);
+    if (svg) svg.innerHTML = '';
+  });
+}
+
+function rebuildAllCharts() {
+  destroyAllCharts();
+  const m = getMobius();
+
+  Chart.defaults.color = m.gaugeFg;
+  Chart.defaults.borderColor = m.innerLines;
+  Chart.defaults.font.family = "'Roboto Condensed', 'Roboto', Arial, sans-serif";
+
+  // BURNUP CHART (PDP Progress)
+  const burnupLabels = ['','Jan','','','','Feb','','','','Mar','','',''];
+  const planData     = [0, 5, 10, 18, 25, 33, 42, 50, 60, 70, 80, 90, 100];
+  const actualData   = [0, 3, 8, 12, 20, 28, 35, 40, 48, 55, 62, null, null];
+
+  chartInstances.burnup = new Chart(document.getElementById('burnupChart'), {
+    type: 'line',
+    data: {
+      labels: burnupLabels,
+      datasets: [{
+        label: 'Actual',
+        data: actualData,
+        borderColor: m.gaugeInteract,
+        backgroundColor: m.gaugeInteract.replace(/[\d.]+\)$/, '0.25)'),
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 2.5,
+        spanGaps: false
+      },{
+        label: 'Plan',
+        data: planData,
+        borderColor: m.innerLines,
+        backgroundColor: m.yellow.replace(/[\d.]+\)$/, '0.08)'),
+        fill: true,
+        borderDash: [4, 3],
+        tension: 0.2,
+        pointRadius: 0,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          ticks: {
+            callback: v => v + '%',
+            stepSize: 50,
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" }
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        },
+        x: {
+          ticks: {
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            maxRotation: 0
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // PERFORMANCE vs MANNED GAUGE (Sell Product KPI 2)
+  (function buildPerfGauge() {
+    const svg = document.getElementById('perfGauge');
+    if (!svg) return;
+    const cx = 100, cy = 105, r = 85;
+    const startAngle = Math.PI;
+    // Color zones matching Figma: red → orange → yellow → teal → dark teal
+    const zones = [
+      { end: 0.20, color: m.gaugeCrit },
+      { end: 0.38, color: m.orange },
+      { end: 0.55, color: m.yellow },
+      { end: 0.78, color: m.gaugeOK },
+      { end: 1.00, color: m.gaugeInteract },
+    ];
+    let prevEnd = 0;
+    zones.forEach(zone => {
+      const a1 = startAngle + prevEnd * Math.PI;
+      const a2 = startAngle + zone.end * Math.PI;
+      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} A ${r} ${r} 0 ${(zone.end - prevEnd) > 0.5 ? 1 : 0} 1 ${x2} ${y2}`);
+      path.setAttribute('stroke', zone.color);
+      path.setAttribute('stroke-width', '16');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'butt');
+      svg.appendChild(path);
+      prevEnd = zone.end;
+    });
+    // Needle — 94% on a 60–100 range
+    // Starts partway out (r-45) so it doesn't overlap the center value
+    const value = 94, min = 60, max = 100;
+    const fraction = (value - min) / (max - min);
+    const needleAngle = startAngle + fraction * Math.PI;
+    const innerR = 40;   // needle starts here (away from number)
+    const outerR = r - 6; // needle ends just inside the arc
+    const sx = cx + innerR * Math.cos(needleAngle);
+    const sy = cy + innerR * Math.sin(needleAngle);
+    const nx = cx + outerR * Math.cos(needleAngle);
+    const ny = cy + outerR * Math.sin(needleAngle);
+    // Needle body
+    const needle = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    needle.setAttribute('x1', sx); needle.setAttribute('y1', sy);
+    needle.setAttribute('x2', nx); needle.setAttribute('y2', ny);
+    needle.setAttribute('stroke', m.fgStrong);
+    needle.setAttribute('stroke-width', '3');
+    needle.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(needle);
+    // Needle tip
+    const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    tip.setAttribute('cx', nx); tip.setAttribute('cy', ny); tip.setAttribute('r', '5');
+    tip.setAttribute('fill', m.action);
+    svg.appendChild(tip);
+  })();
+
+  // PERFORMANCE vs MANNED — Sparkline (quarterly trend)
+  chartInstances.perfSparkline = new Chart(document.getElementById('perfSparkline'), {
+    type: 'line',
+    data: {
+      labels: ['Q1','Q2','Q3','Q4','Q1','Q2','Q3','Q4'],
+      datasets: [{
+        data: [64, 71, 68, 78, 73, 82, 76, 85, 80, 90, 87, 94],
+        borderColor: m.gaugeInteract,
+        backgroundColor: m.gaugeInteract.replace(/[\d.]+\)$/, '0.15)'),
+        fill: true,
+        tension: 0.5,
+        pointRadius: 0,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false, min: 60, max: 100 }
+      }
+    }
+  });
+
+  // MTTI CHART (Mean Time to Intervention — Sell Product KPI 3)
+  const mttiLabels = ['','Jan','','','','Feb','','','','Mar','',''];
+  const mttiData   = [58, 55, 50, 48, 42, 38, 33, 30, 25, 22, 18, 16];
+  const mttiTarget = Array(12).fill(30);
+
+  chartInstances.mtti = new Chart(document.getElementById('mttiChart'), {
+    type: 'line',
+    data: {
+      labels: mttiLabels,
+      datasets: [{
+        label: 'MTTI',
+        data: mttiData,
+        borderColor: m.gaugeInteract,
+        backgroundColor: m.gaugeInteract.replace(/[\d.]+\)$/, '0.2)'),
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: m.gaugeInteract,
+        borderWidth: 2.5
+      },{
+        label: 'Target',
+        data: mttiTarget,
+        borderColor: m.green,
+        borderDash: [6, 4],
+        fill: false,
+        tension: 0,
+        pointRadius: 0,
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        // Custom plugin to draw "Target" label on the dashed line
+        targetLabel: {}
+      },
+      scales: {
+        y: {
+          min: 10, max: 60,
+          ticks: {
+            values: [10, 30, 60],
+            callback: v => v,
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        },
+        x: {
+          ticks: {
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            maxRotation: 0,
+            color: m.gaugeFg
+          },
+          grid: { display: false }
+        }
+      }
+    },
+    plugins: [{
+      id: 'targetLabel',
+      afterDraw(chart) {
+        const ds = chart.data.datasets[1];
+        if (!ds) return;
+        const yScale = chart.scales.y;
+        const yPos = yScale.getPixelForValue(30);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = '11px "Roboto Condensed", sans-serif';
+        ctx.fillStyle = m.green;
+        ctx.textAlign = 'right';
+        ctx.fillText('Target', chart.chartArea.right, yPos - 5);
+        ctx.restore();
+      }
+    }]
+  });
+
+  // MTTI — Interventions by Type (stacked bar chart)
+  chartInstances.mttiInterventions = new Chart(document.getElementById('mttiInterventions'), {
+    type: 'bar',
+    data: {
+      labels: ['Mar', 'Apr', 'May', 'Jun', 'Jun'],
+      datasets: [
+        {
+          label: 'Navigation',
+          data: [18, 8, 14, 6, 5],
+          backgroundColor: m.infoBlue,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        },
+        {
+          label: 'Safety',
+          data: [4, 3, 5, 4, 3],
+          backgroundColor: m.green,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        },
+        {
+          label: 'Error',
+          data: [3, 0, 4, 0, 0],
+          backgroundColor: m.red,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        },
+        {
+          label: 'Manual',
+          data: [0, 0, 0, 3, 3],
+          backgroundColor: m.yellow,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        },
+        {
+          label: 'Other',
+          data: [0, 2, 0, 2, 2],
+          backgroundColor: m.gaugeFg,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          stacked: true,
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          stacked: true,
+          display: false,
+          min: 0
+        }
+      }
+    }
+  });
+
+  // WARRANTY CHART (Reliability — Grouped-Stacked Bars, Sell Product KPI 4)
+  // 3 colors: Units (teal), Claims (orange), Costs (blue)
+  // Bar 1 per month: Units (bottom) + Claims (top) → Warranty Rate
+  // Bar 2 per month: Units (bottom) + Costs (top) → Warranty Cost per Unit
+  chartInstances.warranty = new Chart(document.getElementById('warrantyChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar'],
+      datasets: [
+        // --- Stack "rate": Units (bottom) + Claims (top) ---
+        {
+          label: 'Units',
+          data: [560, 500, 500],
+          backgroundColor: m.gaugeInteract,
+          stack: 'rate',
+          borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4 },
+          barPercentage: 0.75,
+          categoryPercentage: 0.6
+        },
+        {
+          label: 'Claims',
+          data: [18, 14, 12],
+          backgroundColor: m.orange,
+          stack: 'rate',
+          borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+          barPercentage: 0.75,
+          categoryPercentage: 0.6
+        },
+        // --- Stack "cost": Units (bottom) + Costs (top) ---
+        {
+          label: 'Units ',
+          data: [560, 500, 500],
+          backgroundColor: m.gaugeInteract,
+          stack: 'cost',
+          borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4 },
+          barPercentage: 0.75,
+          categoryPercentage: 0.6
+        },
+        {
+          label: 'Cost ($K)',
+          data: [235, 190, 155],
+          backgroundColor: m.green,
+          stack: 'cost',
+          borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+          barPercentage: 0.75,
+          categoryPercentage: 0.6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const lbl = ctx.dataset.label.trim();
+              if (lbl === 'Units') return 'Units deployed: ' + ctx.parsed.y;
+              if (lbl === 'Claims') return 'Warranty claims: ' + ctx.parsed.y;
+              if (lbl === 'Cost ($K)') return 'Warranty cost: $' + ctx.parsed.y + 'K';
+              return lbl + ': ' + ctx.parsed.y;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: {
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false }
+        },
+        y: {
+          stacked: true,
+          ticks: {
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        }
+      }
+    }
+  });
+
+  // CONTRIBUTION MARGIN CHART (Horizontal Stacked Bar, Sell Product KPI 5)
+  // 6 teams, each bar stacks Costs (left) + Revenue (right)
+  const marginTeams = ['Hauling', 'Grading', 'Drilling', 'Logistics', 'Survey', 'Support'];
+  const revData  = [92, 78, 68, 55, 48, 38];   // Revenue $K
+  const costData = [34, 31, 26, 21, 20, 24];   // Variable costs $K
+
+  chartInstances.margin = new Chart(document.getElementById('marginChart'), {
+    type: 'bar',
+    data: {
+      labels: marginTeams,
+      datasets: [
+        {
+          label: 'Costs',
+          data: costData,
+          backgroundColor: m.orange,
+          borderRadius: { topLeft: 3, topRight: 0, bottomLeft: 3, bottomRight: 0 },
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
+        },
+        {
+          label: 'Revenue',
+          data: revData.map((r, i) => r - costData[i]),
+          backgroundColor: m.gaugeInteract,
+          borderRadius: { topLeft: 0, topRight: 3, bottomLeft: 0, bottomRight: 3 },
+          barPercentage: 0.7,
+          categoryPercentage: 0.8
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const i = ctx.dataIndex;
+              if (ctx.dataset.label === 'Revenue') {
+                return 'Revenue: $' + revData[i] + 'K (margin: $' + (revData[i] - costData[i]) + 'K)';
+              }
+              return 'Costs: $' + costData[i] + 'K';
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          stacked: true,
+          ticks: {
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.fgPrimary
+          },
+          grid: { display: false }
+        },
+        x: {
+          stacked: true,
+          ticks: {
+            callback: v => '$' + v + 'K',
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        }
+      }
+    }
+  });
+
+  // PIPELINE BUBBLE CHART (Sell Product KPI 6)
+  // Each bubble = a deal. X = win probability, Y = deal size, R = weighted value
+  const pipeDeals = [
+    { x: 10, y: 50,  r: 4 },
+    { x: 15, y: 80,  r: 5 },
+    { x: 18, y: 120, r: 5 },
+    { x: 22, y: 150, r: 6 },
+    { x: 25, y: 200, r: 7 },
+    { x: 28, y: 180, r: 6 },
+    { x: 30, y: 250, r: 7 },
+    { x: 32, y: 300, r: 8 },
+    { x: 35, y: 280, r: 8 },
+    { x: 40, y: 350, r: 9 },
+    { x: 42, y: 320, r: 8 },
+    { x: 48, y: 400, r: 9 },
+    { x: 55, y: 500, r: 10 },
+    { x: 60, y: 450, r: 10 },
+    { x: 70, y: 600, r: 11 },
+    { x: 80, y: 800, r: 13 },
+  ];
+
+  chartInstances.pipeline = new Chart(document.getElementById('pipelineBubble'), {
+    type: 'bubble',
+    data: {
+      datasets: [{
+        label: 'Deals',
+        data: pipeDeals,
+        backgroundColor: pipeDeals.map(d => {
+          const alpha = 0.3 + (d.x / 100) * 0.5;
+          return m.infoBlue.replace(/[\d.]+\)$/, alpha.toFixed(2) + ')');
+        }),
+        borderColor: m.infoBlue,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          title: { display: false },
+          ticks: {
+            callback: v => v + '%',
+            stepSize: 25,
+            font: { size: 11, family: "'Roboto Condensed', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        },
+        y: {
+          min: 0,
+          title: { display: false },
+          ticks: {
+            display: false
+          },
+          grid: { color: m.innerLines, drawBorder: false }
+        }
+      }
+    }
+  });
+
+  // =============================================
+  // EFFICIENCY SECTION CHARTS
+  // =============================================
+
+  // Dev Cost to Pilot — Stacked Area Chart
+  const costMonths = ['', 'M1', '', 'M2', '', 'M3', '', 'M4', '', 'M5', '', 'M6'];
+  const laborCost     = [0, 30, 65, 110, 160, 220, 280, 340, 390, 430, 470, 500];
+  const hwCost        = [0, 10, 25, 45, 70, 90, 105, 120, 135, 150, 160, 170];
+  const otherCost     = [0, 5, 12, 20, 30, 38, 45, 52, 58, 65, 72, 80];
+  // Target line at $800k
+  const targetCost    = Array(12).fill(800);
+
+  chartInstances.effCostArea = new Chart(document.getElementById('effCostArea'), {
+    type: 'line',
+    data: {
+      labels: costMonths,
+      datasets: [
+        {
+          label: 'Labor',
+          data: laborCost,
+          backgroundColor: m.infoBlue.replace(/[\d.]+\)$/, '0.5)'),
+          borderColor: m.infoBlue,
+          fill: true, tension: 0.3, pointRadius: 0, borderWidth: 1.5
+        },
+        {
+          label: 'Hardware',
+          data: hwCost.map((v, i) => v + laborCost[i]),
+          backgroundColor: m.yellow.replace(/[\d.]+\)$/, '0.5)'),
+          borderColor: m.yellow,
+          fill: '-1', tension: 0.3, pointRadius: 0, borderWidth: 1.5
+        },
+        {
+          label: 'Other',
+          data: otherCost.map((v, i) => v + hwCost[i] + laborCost[i]),
+          backgroundColor: m.innerLines.replace(/[\d.]+\)$/, '0.4)'),
+          borderColor: m.innerLines,
+          fill: '-1', tension: 0.3, pointRadius: 0, borderWidth: 1.5
+        },
+        {
+          label: 'Target',
+          data: targetCost,
+          borderColor: m.orange,
+          borderDash: [4, 3],
+          fill: false, pointRadius: 0, borderWidth: 1.5
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { font: { size: 11, family: "'Roboto Condensed', sans-serif" }, color: m.gaugeFg, maxRotation: 0 },
+          grid: { display: false }
+        },
+        y: {
+          stacked: false,
+          min: 0,
+          ticks: { display: false },
+          grid: { color: m.innerLines, drawBorder: false }
+        }
+      }
+    }
+  });
+
+  // AI-Generated Code — Sparkline (trending up with volatility)
+  chartInstances.effAiCode = new Chart(document.getElementById('effAiCodeSparkline'), {
+    type: 'line',
+    data: {
+      labels: Array(12).fill(''),
+      datasets: [{
+        data: [22, 28, 25, 34, 31, 40, 36, 45, 50, 53, 58, 62],
+        borderColor: m.green,
+        backgroundColor: m.green.replace(/[\d.]+\)$/, '0.12)'),
+        fill: true,
+        tension: 0.5,
+        pointRadius: 0,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false, min: 10, max: 70 } }
+    }
+  });
+
+  // Helper: sparkline factory
+  function makeSparkline(canvasId, data, color) {
+    return new Chart(document.getElementById(canvasId), {
+      type: 'line',
+      data: {
+        labels: data.map((_, i) => i),
+        datasets: [{
+          data: data,
+          borderColor: color,
+          backgroundColor: color.replace(/[\d.]+\)$/, '0.15)'),
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false },
+          y: { display: false }
+        }
+      }
+    });
+  }
+
+  // Test Cases — Sparkline (trending up)
+  // Test coverage sparkline (trending up)
+  chartInstances.effTest = makeSparkline('effTestSparkline',
+    [22, 31, 26, 38, 30, 42, 35, 48, 39, 53, 44, 51], m.gaugeFg);
+
+  // Install Time — Single bar chart (monthly trend, like Revenue Trend)
+  chartInstances.effInstallChart = new Chart(document.getElementById('effInstallChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+      datasets: [{
+        data: [7.8, 7.5, 7.2, 7.0, 6.8, 6.6, 6.5, 6.3, 6.2],
+        backgroundColor: m.infoBlue,
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.75
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          min: 0,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => v + 'd',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // Kit Build Time — Per-kit bar chart (5 kits, colored by type)
+  chartInstances.effBuildBars = new Chart(document.getElementById('effBuildBars'), {
+    type: 'bar',
+    data: {
+      labels: ['Kit A', 'Kit B', 'Kit C', 'Kit D', 'Kit E'],
+      datasets: [{
+        data: [22, 20, 18, 16, 15],
+        backgroundColor: [m.infoBlue, m.yellow, m.gaugeFg, m.infoBlue, m.green],
+        borderRadius: 3,
+        barPercentage: 0.6,
+        categoryPercentage: 0.7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: { display: false },
+        y: {
+          display: true,
+          min: 0,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => v + 'h',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // Cost to Phase 6 — Cumulative area chart (Actual vs Budget)
+  chartInstances.effCostPhase6 = new Chart(document.getElementById('effCostPhase6'), {
+    type: 'line',
+    data: {
+      labels: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10'],
+      datasets: [
+        {
+          label: 'Budget',
+          data: [300, 550, 800, 1050, 1350, 1650, 1950, 2300, 2650, 3000],
+          borderColor: m.yellow,
+          backgroundColor: m.yellow.replace(/[\d.]+\)$/, '0.15)'),
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: m.yellow,
+          borderWidth: 2,
+          order: 1
+        },
+        {
+          label: 'Actual',
+          data: [100, 200, 350, 500, 700, 950, 1300, 1700, 2100, 2400],
+          borderColor: m.infoBlue,
+          backgroundColor: m.infoBlue.replace(/[\d.]+\)$/, '0.25)'),
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointBackgroundColor: m.infoBlue,
+          borderWidth: 2,
+          order: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: false
+        },
+        y: {
+          display: true,
+          min: 0,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'M' : v + 'K',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // BOM Cost Reduction — Bar chart showing declining BOM cost per unit
+  chartInstances.effBomReduction = new Chart(document.getElementById('effBomReduction'), {
+    type: 'bar',
+    data: {
+      labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+      datasets: [{
+        data: [235, 228, 220, 212, 208, 202, 198, 195, 193],
+        backgroundColor: m.green,
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.75
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          min: 150,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => '$' + v + 'K',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // Extensible Kit — Doughnut chart for component reuse rate
+  chartInstances.effExtensibleDonut = new Chart(document.getElementById('effExtensibleDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Reusable', 'Custom'],
+      datasets: [{
+        data: [72, 28],
+        backgroundColor: [m.infoBlue, m.innerLines],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: { legend: { display: false }, tooltip: { enabled: true } }
+    }
+  });
+
+  // LINE CHART
+  chartInstances.line = new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: ['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+      datasets: [{
+        label: 'Revenue',
+        data: [1.2, 1.35, 1.28, 1.52, 1.68, 1.75, 1.92, 2.15, 2.4],
+        borderColor: m.action,
+        backgroundColor: m.action.replace(/[\d.]+\)$/, '0.1)'),
+        fill: true, tension: 0.4, pointRadius: 4,
+        pointBackgroundColor: m.action, borderWidth: 2.5
+      },{
+        label: 'Target',
+        data: [1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1],
+        borderColor: m.innerLines, borderDash: [6, 4],
+        fill: false, tension: 0.4, pointRadius: 0, borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16 } } },
+      scales: {
+        y: { beginAtZero: false, ticks: { callback: v => '$' + v + 'M' }, grid: { color: m.innerLines } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // BAR CHART
+  chartInstances.bar = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Enterprise', 'Mid-Market', 'SMB', 'Government', 'Education'],
+      datasets: [{ label: 'Q4 Revenue', data: [820, 540, 380, 290, 170],
+        backgroundColor: [m.infoBlue, m.green, m.purple, m.orange, m.yellow],
+        borderRadius: 4, borderSkipped: false, barThickness: 36
+      }]
+    },
+    options: {
+      responsive: true, plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => '$' + v + 'K' }, grid: { color: m.innerLines } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // DOUGHNUT
+  chartInstances.doughnut = new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Engineering', 'Sales & Marketing', 'Operations', 'R&D', 'Admin'],
+      datasets: [{ data: [35, 25, 18, 15, 7],
+        backgroundColor: [m.infoBlue, m.green, m.orange, m.purple, m.yellow],
+        borderWidth: 0, hoverOffset: 8
+      }]
+    },
+    options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 14 } } } }
+  });
+
+  // RADAR
+  chartInstances.radar = new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Innovation','Efficiency','Quality','Growth','Culture','Delivery'],
+      datasets: [{
+        label: 'Current', data: [85, 72, 90, 78, 88, 80],
+        borderColor: m.action, backgroundColor: m.action.replace(/[\d.]+\)$/, '0.12)'),
+        pointBackgroundColor: m.action, borderWidth: 2
+      },{
+        label: 'Target', data: [90, 85, 85, 90, 90, 90],
+        borderColor: m.innerLines, backgroundColor: 'transparent',
+        pointBackgroundColor: m.innerLines, borderDash: [4, 4], borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 25, display: false },
+        grid: { color: m.innerLines }, angleLines: { color: m.innerLines }, pointLabels: { font: { size: 11 } } } },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } }
+    }
+  });
+
+  // BUBBLE
+  chartInstances.bubble = new Chart(document.getElementById('bubbleChart'), {
+    type: 'bubble',
+    data: {
+      datasets: [
+        { label: 'Enterprise', data: [{x:82,y:420,r:18},{x:65,y:310,r:14},{x:90,y:580,r:22}],
+          backgroundColor: m.infoBlue.replace(/[\d.]+\)$/, '0.45)'), borderColor: m.infoBlue, borderWidth: 1.5 },
+        { label: 'Mid-Market', data: [{x:45,y:180,r:10},{x:58,y:220,r:12},{x:72,y:150,r:8},{x:35,y:95,r:7}],
+          backgroundColor: m.green.replace(/[\d.]+\)$/, '0.4)'), borderColor: m.green, borderWidth: 1.5 },
+        { label: 'SMB', data: [{x:20,y:45,r:5},{x:30,y:65,r:6},{x:40,y:80,r:7},{x:15,y:30,r:4},{x:50,y:55,r:5}],
+          backgroundColor: m.innerLines.replace(/[\d.]+\)$/, '0.5)'), borderColor: m.gaugeFg, borderWidth: 1.5 },
+        { label: 'High Priority', data: [{x:75,y:350,r:16}],
+          backgroundColor: m.orange.replace(/[\d.]+\)$/, '0.5)'), borderColor: m.orange, borderWidth: 2 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 14 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw.y}K deal, ${ctx.raw.x}% probability` } } },
+      scales: {
+        x: { title: { display: true, text: 'Win Probability %', color: m.gaugeFg }, min: 0, max: 100, grid: { color: m.innerLines } },
+        y: { title: { display: true, text: 'Deal Size ($K)', color: m.gaugeFg }, beginAtZero: true,
+          ticks: { callback: v => '$' + v + 'K' }, grid: { color: m.innerLines } }
+      }
+    }
+  });
+
+  // GAUGE RINGS
+  function createGauge(id, value, color) {
+    chartInstances[id] = new Chart(document.getElementById(id), {
+      type: 'doughnut',
+      data: { datasets: [{ data: [value, 100 - value], backgroundColor: [color, m.gaugeDataBg], borderWidth: 0, circumference: 270, rotation: 225 }] },
+      options: { responsive: true, cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    });
+  }
+  createGauge('gauge1', 92, m.green);
+  createGauge('gauge2', 87, m.action);
+  createGauge('gauge3', 68, m.orange);
+  createGauge('gauge4', 74, m.purple);
+
+  // SPEEDOMETERS
+  function createSpeedometer(svgId, value, min, max) {
+    const svg = document.getElementById(svgId);
+    const cx = 100, cy = 105, r = 85;
+    const startAngle = Math.PI;
+    const zones = [
+      { end: 0.25, color: m.gaugeCrit },
+      { end: 0.45, color: m.gaugeWarn },
+      { end: 0.60, color: m.yellow },
+      { end: 0.80, color: m.gaugeOK },
+      { end: 1.00, color: m.gaugeInteract },
+    ];
+    let prevEnd = 0;
+    zones.forEach(zone => {
+      const a1 = startAngle + prevEnd * Math.PI;
+      const a2 = startAngle + zone.end * Math.PI;
+      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${x1} ${y1} A ${r} ${r} 0 ${(zone.end - prevEnd) > 0.5 ? 1 : 0} 1 ${x2} ${y2}`);
+      path.setAttribute('stroke', zone.color);
+      path.setAttribute('stroke-width', '14');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'butt');
+      svg.appendChild(path);
+      prevEnd = zone.end;
+    });
+    const fraction = (value - min) / (max - min);
+    const needleAngle = startAngle + fraction * Math.PI;
+    const nx = cx + (r - 12) * Math.cos(needleAngle);
+    const ny = cy + (r - 12) * Math.sin(needleAngle);
+    const needle = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    needle.setAttribute('x1', cx); needle.setAttribute('y1', cy);
+    needle.setAttribute('x2', nx); needle.setAttribute('y2', ny);
+    needle.setAttribute('stroke', m.fgStrong); needle.setAttribute('stroke-width', '3');
+    needle.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(needle);
+    const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    tip.setAttribute('cx', nx); tip.setAttribute('cy', ny); tip.setAttribute('r', '4');
+    tip.setAttribute('fill', m.action);
+    svg.appendChild(tip);
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', '6');
+    dot.setAttribute('fill', m.gaugeDataBg); dot.setAttribute('stroke', m.innerLines);
+    dot.setAttribute('stroke-width', '2');
+    svg.appendChild(dot);
+  }
+  createSpeedometer('speedo1', 94, 60, 100);
+  createSpeedometer('speedo2', 78, 0, 100);
+  createSpeedometer('speedo3', 91, 50, 100);
+  createSpeedometer('speedo4', 87, 60, 100);
+}
+
+// =============================================
+// INIT
+// =============================================
+buildThemeMenu();
+applyTheme('light');
+</script>
+</body>
+</html>
