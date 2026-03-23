@@ -240,6 +240,7 @@
   .sell-product-row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 1fr;
     gap: 16px;
     margin-bottom: 8px;
   }
@@ -324,7 +325,7 @@
     background: var(--BackgroundStrong);
     border-radius: 8px;
     padding: 20px;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -405,6 +406,7 @@
     gap: 0;
     box-shadow: 0 1px 3px var(--ShadowElements);
     aspect-ratio: 1 / 1;
+    overflow: hidden;
   }
 
   .gauge-widget .gauge-header {
@@ -431,9 +433,10 @@
   .gauge-widget .gauge-wrap {
     position: relative;
     width: 100%;
-    max-width: 280px;
-    height: 155px;
+    max-width: min(280px, 100%);
+    aspect-ratio: 200 / 115;
     margin: 4px auto 0;
+    flex-shrink: 1;
   }
 
   .gauge-widget .gauge-wrap svg {
@@ -455,7 +458,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    max-width: 280px;
+    max-width: min(280px, 100%);
     margin: -2px auto 0;
     font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
     color: var(--GaugeForeground);
@@ -786,11 +789,109 @@
     height: 100% !important;
   }
 
+  /* Compact mode: tighten internals so 1:1 fits at smaller widths */
+  @media (max-width: 2200px) {
+    .sell-product-row { gap: 10px; }
+    .burnup-widget,
+    .gauge-widget,
+    .mtti-widget,
+    .warranty-widget,
+    .margin-widget,
+    .pipeline-widget {
+      padding: 14px;
+      gap: 4px;
+    }
+    .burnup-widget { gap: 6px; }
+    .burnup-widget .burnup-title,
+    .gauge-widget .gauge-title,
+    .mtti-widget .mtti-title,
+    .warranty-widget .warranty-title,
+    .margin-widget .margin-title,
+    .pipeline-widget .pipe-title {
+      font-size: var(--size-hdrSm);
+      line-height: var(--lh-hdrSm);
+    }
+    .burnup-widget .burnup-value-line { padding-bottom: 4px; }
+    .burnup-widget .burnup-chart-area { min-height: 60px; }
+    .burnup-widget .burnup-footer { gap: 6px; }
+    .burnup-widget .legend-item { font-size: var(--size-Sm); }
+    .gauge-widget .gauge-wrap { max-width: min(200px, 100%); }
+    .gauge-widget .gauge-value { font-size: var(--size-hdrMd); }
+    .mtti-widget .mtti-value-line .mv-number { font-size: var(--size-hdrMd); }
+    .mtti-widget .mtti-value-line .mv-label { font-size: var(--size-Sm); }
+    .warranty-widget .warranty-value-line .wv-number { font-size: var(--size-hdrMd); }
+    .warranty-widget .warranty-value-line .wv-label { font-size: var(--size-Sm); }
+    .margin-widget .margin-value-line .mg-number { font-size: var(--size-hdrMd); }
+    .margin-widget .margin-value-line .mg-label { font-size: var(--size-Sm); }
+    .pipeline-widget .pipe-body { gap: 8px; }
+    .pipeline-widget .pipe-funnel { width: 90px; }
+    .pipeline-widget .funnel-stage { height: 14px; }
+    .pipeline-widget .pm-value { font-size: var(--size-default); }
+    .mtti-widget .mtti-footer .mtti-delta,
+    .warranty-widget .warranty-delta,
+    .margin-widget .margin-delta {
+      font-size: var(--size-default);
+    }
+    .mtti-widget .mtti-footer .mtti-ctx,
+    .warranty-widget .warranty-footer span,
+    .margin-widget .margin-footer span {
+      font-size: var(--size-Sm);
+    }
+  }
+
+  /* Extra compact: even tighter for near-1600px */
+  @media (max-width: 1900px) {
+    .sell-product-row { gap: 8px; }
+    .burnup-widget,
+    .gauge-widget,
+    .mtti-widget,
+    .warranty-widget,
+    .margin-widget,
+    .pipeline-widget {
+      padding: 10px;
+      gap: 3px;
+    }
+    .burnup-widget { gap: 4px; }
+    .burnup-widget .burnup-title,
+    .gauge-widget .gauge-title,
+    .mtti-widget .mtti-title,
+    .warranty-widget .warranty-title,
+    .margin-widget .margin-title,
+    .pipeline-widget .pipe-title {
+      font-size: var(--size-default);
+      line-height: var(--lh-default);
+    }
+    .burnup-widget .burnup-value-line { font-size: var(--size-hdrSm); padding-bottom: 2px; }
+    .burnup-widget .burnup-chart-area { min-height: 40px; }
+    .gauge-widget .gauge-wrap { max-width: min(160px, 100%); }
+    .gauge-widget .gauge-value { font-size: var(--size-hdrSm); }
+    .gauge-widget .gauge-labels { max-width: min(160px, 100%); font-size: 9px; }
+    .mtti-widget .mtti-value-line .mv-number { font-size: var(--size-hdrSm); }
+    .warranty-widget .warranty-value-line .wv-number { font-size: var(--size-hdrSm); }
+    .margin-widget .margin-value-line .mg-number { font-size: var(--size-hdrSm); }
+    .pipeline-widget .pipe-funnel { width: 70px; }
+    .pipeline-widget .funnel-stage { height: 10px; gap: 2px; }
+    .pipeline-widget .pm-label { font-size: 9px; }
+    .pipeline-widget .pm-value { font-size: var(--size-Sm); }
+    .pipeline-widget .pipe-metrics { gap: 2px; }
+    .mtti-widget .mtti-footer { gap: 4px; }
+    .mtti-widget .mtti-footer .mtti-delta { font-size: var(--size-Sm); }
+    .burnup-widget .burnup-delta { font-size: var(--size-default); }
+  }
+
   @media (max-width: 1200px) {
     .sell-product-row { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 700px) {
     .sell-product-row { grid-template-columns: repeat(2, 1fr); }
+    .burnup-widget,
+    .gauge-widget,
+    .mtti-widget,
+    .warranty-widget,
+    .margin-widget,
+    .pipeline-widget {
+      aspect-ratio: auto;
+    }
   }
 
   /* =============================================
@@ -803,11 +904,440 @@
     margin-bottom: 8px;
   }
 
+  @media (max-width: 2200px) {
+    .efficiency-row { gap: 8px; }
+    .eff-kpi {
+      padding: 10px 12px;
+      gap: 4px;
+    }
+    .eff-kpi .eff-title {
+      font-size: var(--size-default);
+      line-height: var(--lh-default);
+    }
+    .eff-kpi .eff-value-line .eff-big {
+      font-size: var(--size-hdrSm);
+      line-height: var(--lh-hdrSm);
+    }
+    .eff-kpi .eff-hero-number {
+      font-size: 56px;
+    }
+    .eff-kpi .eff-value-line .eff-vs {
+      font-size: 9px;
+    }
+    .eff-kpi .eff-section-label {
+      font-size: 9px;
+    }
+  }
+  @media (max-width: 1900px) {
+    .efficiency-row { gap: 6px; }
+    .eff-kpi {
+      padding: 8px 10px;
+      gap: 3px;
+    }
+    .eff-kpi .eff-title {
+      font-size: var(--size-Sm);
+      line-height: var(--lh-Sm);
+    }
+    .eff-kpi .eff-value-line .eff-big {
+      font-size: var(--size-default);
+      line-height: var(--lh-default);
+    }
+    .eff-kpi .eff-hero-number {
+      font-size: 40px;
+    }
+  }
   @media (max-width: 1400px) {
     .efficiency-row { grid-template-columns: repeat(4, 1fr); }
+    .eff-kpi { aspect-ratio: 1 / 1; }
   }
   @media (max-width: 700px) {
     .efficiency-row { grid-template-columns: repeat(2, 1fr); }
+    .eff-kpi { aspect-ratio: auto; }
+  }
+
+  /* =============================================
+     SB INVESTMENT SECTION — 4 COLUMNS
+     ============================================= */
+  .sb-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .sb-kpi {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .sb-kpi .sb-title {
+    font: var(--font-light) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .sb-kpi .sb-value-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .sb-kpi .sb-value-line .sb-big {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .sb-kpi .sb-value-line .sb-sub {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .sb-kpi .sb-section-label {
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+    margin-top: 4px;
+  }
+
+  .sb-kpi .sb-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+  }
+
+  .sb-kpi .sb-footer .sb-delta {
+    font: var(--font-bold) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--InformationGreen);
+  }
+
+  .sb-kpi .sb-footer .sb-ctx {
+    font: var(--font-light) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .sb-kpi .sb-footer .sb-legend {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+
+  .sb-kpi .sb-footer .sb-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .sb-kpi .sb-footer .sb-legend .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 2200px) {
+    .sb-row { gap: 12px; }
+    .sb-kpi {
+      padding: 16px;
+      gap: 4px;
+    }
+    .sb-kpi .sb-title {
+      font-size: var(--size-hdrSm);
+      line-height: var(--lh-hdrSm);
+    }
+    .sb-kpi .sb-value-line .sb-big {
+      font-size: var(--size-hdrMd);
+      line-height: var(--lh-hdrMd);
+    }
+    .sb-kpi .sb-value-line .sb-sub {
+      font-size: var(--size-default);
+    }
+    .sb-kpi .sb-footer .sb-delta {
+      font-size: var(--size-default);
+    }
+    .sb-kpi .sb-footer .sb-ctx {
+      font-size: var(--size-default);
+    }
+    .sb-kpi .sb-footer .sb-legend .legend-item {
+      font-size: var(--size-default);
+    }
+  }
+  @media (max-width: 1900px) {
+    .sb-row { gap: 10px; }
+    .sb-kpi {
+      padding: 12px;
+      gap: 3px;
+    }
+    .sb-kpi .sb-title {
+      font-size: var(--size-default);
+      line-height: var(--lh-default);
+    }
+    .sb-kpi .sb-value-line .sb-big {
+      font-size: var(--size-hdrSm);
+      line-height: var(--lh-hdrSm);
+    }
+    .sb-kpi .sb-value-line .sb-sub {
+      font-size: var(--size-default);
+    }
+    .sb-kpi .sb-footer .sb-delta {
+      font-size: var(--size-default);
+    }
+    .sb-kpi .sb-footer .sb-legend .legend-item {
+      font-size: var(--size-default);
+    }
+  }
+  @media (max-width: 1200px) {
+    .sb-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .sb-row { grid-template-columns: 1fr; }
+  }
+
+  /* =============================================
+     IPO + BUSINESS UNIT SIDE-BY-SIDE WRAPPER
+     ============================================= */
+  .dual-section-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 8px;
+  }
+
+  .dual-section-col {
+    min-width: 0;
+  }
+
+  @media (max-width: 1200px) {
+    .dual-section-row { grid-template-columns: 1fr; }
+  }
+
+  /* =============================================
+     IPO / OTHER INVESTORS SECTION
+     ============================================= */
+  .ipo-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .ipo-kpi {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+
+  .ipo-kpi .ipo-title {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .ipo-kpi .ipo-value-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ipo-kpi .ipo-value-line .ipo-big {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .ipo-kpi .ipo-value-line .ipo-sub {
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .ipo-kpi .ipo-tertiary {
+    border-top: 1px solid var(--InnerLines);
+    padding-top: 4px;
+    margin-top: auto;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-align: center;
+  }
+
+  .ipo-kpi .ipo-tertiary .ipo-highlight {
+    font-weight: var(--font-bold);
+    color: var(--InformationGreen);
+  }
+
+  @media (max-width: 2200px) {
+    .ipo-row { gap: 10px; }
+    .ipo-kpi { padding: 10px 12px; gap: 4px; }
+    .ipo-kpi .ipo-title { font-size: var(--size-default); line-height: var(--lh-default); }
+    .ipo-kpi .ipo-value-line .ipo-big { font-size: var(--size-hdrMd); line-height: var(--lh-hdrMd); }
+  }
+  @media (max-width: 1900px) {
+    .ipo-row { gap: 8px; }
+    .ipo-kpi { padding: 8px 10px; gap: 3px; }
+    .ipo-kpi .ipo-title { font-size: var(--size-Sm); }
+    .ipo-kpi .ipo-value-line .ipo-big { font-size: var(--size-hdrSm); line-height: var(--lh-hdrSm); }
+  }
+
+  /* =============================================
+     BUSINESS UNIT INVESTMENT SECTION
+     ============================================= */
+  .bu-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .bu-kpi {
+    background: var(--BackgroundStrong);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px var(--ShadowElements);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+  }
+
+  .bu-kpi .bu-title {
+    font: var(--font-light) var(--size-hdrSm) / var(--lh-hdrSm) var(--header-font);
+    color: var(--ForegroundAction);
+    text-transform: uppercase;
+  }
+
+  .bu-kpi .bu-title .bu-title-sub {
+    font-weight: var(--font-normal);
+    text-transform: none;
+    color: var(--GaugeForeground);
+    font-size: var(--size-Sm);
+  }
+
+  .bu-kpi .bu-value-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .bu-kpi .bu-value-line .bu-big {
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .bu-kpi .bu-value-line .bu-big .bu-pct {
+    font-size: 0.55em;
+    vertical-align: baseline;
+  }
+
+  .bu-kpi .bu-value-line .bu-sub {
+    font: var(--font-normal) var(--size-default) / var(--lh-default) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .bu-kpi .bu-context {
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+  }
+
+  .bu-kpi .bu-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: var(--font-bold) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+  }
+
+  .bu-kpi .bu-status.aligned { color: var(--InformationGreen); }
+  .bu-kpi .bu-status.partial { color: var(--InformationYellow); }
+  .bu-kpi .bu-status.not-aligned { color: var(--InformationRed); }
+
+  .bu-kpi .bu-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .bu-kpi .bu-checklist .bu-check-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--ForegroundStrong);
+  }
+
+  .bu-kpi .bu-checklist .bu-check-icon {
+    font-size: 12px;
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+  }
+
+  .bu-kpi .bu-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font: var(--font-bold) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: #fff;
+    background: var(--InformationGreen);
+  }
+
+  .bu-kpi .bu-tertiary {
+    border-top: 1px solid var(--InnerLines);
+    padding-top: 4px;
+    margin-top: auto;
+    font: var(--font-normal) var(--size-Sm) / var(--lh-Sm) var(--default-font);
+    color: var(--GaugeForeground);
+    text-align: center;
+  }
+
+  .bu-kpi .bu-tertiary .bu-highlight {
+    font-weight: var(--font-bold);
+    color: var(--InformationGreen);
+  }
+
+  /* Horizontal stacked bar for BU alignment */
+  .bu-bar-track {
+    width: 100%;
+    height: 14px;
+    background: var(--InnerLines);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .bu-bar-track .bu-bar-seg {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+
+  @media (max-width: 2200px) {
+    .bu-row { gap: 10px; }
+    .bu-kpi { padding: 10px 12px; gap: 4px; }
+    .bu-kpi .bu-title { font-size: var(--size-default); line-height: var(--lh-default); }
+    .bu-kpi .bu-value-line .bu-big { font-size: var(--size-hdrMd); line-height: var(--lh-hdrMd); }
+  }
+  @media (max-width: 1900px) {
+    .bu-row { gap: 8px; }
+    .bu-kpi { padding: 8px 10px; gap: 3px; }
+    .bu-kpi .bu-title { font-size: var(--size-Sm); }
+    .bu-kpi .bu-value-line .bu-big { font-size: var(--size-hdrSm); line-height: var(--lh-hdrSm); }
   }
 
   /* Compact KPI widget for 8-col layout */
@@ -940,8 +1470,12 @@
   }
 
   .eff-kpi .eff-value-line .eff-big {
-    font: var(--font-bold) var(--size-hdrMd) / var(--lh-hdrMd) var(--header-font);
+    font: var(--font-thin) var(--size-hdrLg) / var(--lh-hdrLg) var(--header-font);
     color: var(--ForegroundStrong);
+  }
+
+  .eff-kpi .eff-hero-number {
+    font: var(--font-thin) 80px/1 var(--header-font);
   }
 
   .eff-kpi .eff-value-line .eff-vs {
@@ -1301,7 +1835,7 @@
 <!-- subtitle hidden -->
 
 <!-- ====== SELL PRODUCT — PRIMARY KPI ROW ====== -->
-<div class="section-label">Sell Product</div>
+<div class="section-label">Sell Product <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); text-transform:none; margin-left:8px;">Owner: Cory</span></div>
 <div class="sell-product-row">
 
   <!-- 1. PDP Progress (Burnup) -->
@@ -1457,7 +1991,7 @@
 </div>
 
 <!-- ====== EFFICIENCY — KPI ROW ====== -->
-<div class="section-label">Efficiency</div>
+<div class="section-label">Efficiency <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); text-transform:none; margin-left:8px;">Owners: Todd &amp; Brian</span></div>
 <div class="efficiency-row">
 
   <!-- 1. Development Cost to Pilot -->
@@ -1506,7 +2040,7 @@
   <div class="eff-kpi">
     <div class="eff-title">AI-Generated Code</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
-      <div style="font: var(--font-thin) 80px/1 var(--header-font); color:var(--ForegroundStrong);">62%</div>
+      <div class="eff-hero-number" style="color:var(--ForegroundStrong);">62%</div>
       <div style="color:var(--InformationGreen); font-size:var(--size-hdrLg); line-height:1;">&#x2B06;</div>
     </div>
     <div style="flex:1; min-height:0; position:relative;">
@@ -1546,7 +2080,7 @@
   <div class="eff-kpi">
     <div class="eff-title">Install Time</div>
     <div class="eff-value-line">
-      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">6.2</span>
+      <span class="eff-big" style="color:var(--ForegroundStrong);">6.2</span>
       <span class="eff-vs">days</span>
       <span class="eff-vs" style="margin-left:4px;">Avg Install Time</span>
     </div>
@@ -1560,7 +2094,7 @@
   <div class="eff-kpi">
     <div class="eff-title">Kit Build Time</div>
     <div class="eff-value-line">
-      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">18</span>
+      <span class="eff-big" style="color:var(--ForegroundStrong);">18</span>
       <span class="eff-vs">hrs</span>
       <span class="eff-vs" style="margin-left:4px;">Avg Build Time</span>
     </div>
@@ -1575,7 +2109,7 @@
   <div class="eff-kpi">
     <div class="eff-title">Dev Cost to Phase 6</div>
     <div class="eff-value-line">
-      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">$2.4M</span>
+      <span class="eff-big" style="color:var(--ForegroundStrong);">$2.4M</span>
       <span class="eff-vs">Cost to Phase 6</span>
     </div>
     <div class="eff-section-label">Cost vs Budget</div>
@@ -1594,7 +2128,7 @@
   <div class="eff-kpi">
     <div class="eff-title">BOM Reduction of Cost</div>
     <div class="eff-value-line">
-      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--InformationGreen);">-18%</span>
+      <span class="eff-big" style="color:var(--InformationGreen);">-18%</span>
       <span class="eff-vs">$42K saved / kit</span>
     </div>
     <div class="eff-section-label">BOM Cost per Unit ($K)</div>
@@ -1608,7 +2142,7 @@
   <div class="eff-kpi">
     <div class="eff-title">Extensible Kit</div>
     <div class="eff-value-line">
-      <span class="eff-big" style="font:var(--font-thin) var(--size-hdrLg)/var(--lh-hdrLg) var(--header-font); color:var(--ForegroundStrong);">7 / 10</span>
+      <span class="eff-big" style="color:var(--ForegroundStrong);">7 / 10</span>
       <span class="eff-vs">Configs</span>
     </div>
     <!-- Doughnut chart for reuse rate -->
@@ -1633,147 +2167,245 @@
 
 </div>
 
-<!-- ====== KPI CARDS ====== -->
-<div class="section-label">KPI Summary Cards</div>
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="icon" style="background:var(--MessageDeliveryBackgroundInfo);color:var(--ForegroundAction);">$</div>
-    <div class="label">Total Revenue</div>
-    <div class="value">$2.4M</div>
-    <div class="change up">▲ 12.5% vs last quarter</div>
-  </div>
-  <div class="kpi-card">
-    <div class="icon" style="background:var(--MessageDeliveryBackgroundOk);color:var(--InformationGreen);">✓</div>
-    <div class="label">Active Clients</div>
-    <div class="value">1,284</div>
-    <div class="change up">▲ 8.3% vs last quarter</div>
-  </div>
-  <div class="kpi-card">
-    <div class="icon" style="background:var(--MessageDeliveryBackgroundWarning);color:var(--InformationOrange);">⏱</div>
-    <div class="label">Avg. Response Time</div>
-    <div class="value">2.4h</div>
-    <div class="change down">▼ 15% vs last quarter</div>
-  </div>
-  <div class="kpi-card">
-    <div class="icon" style="background:var(--MessageDeliveryBackgroundCritical);color:var(--InformationRed);">★</div>
-    <div class="label">NPS Score</div>
-    <div class="value">72</div>
-    <div class="change up">▲ 4 pts vs last quarter</div>
-  </div>
-</div>
+<!-- ====== SB INVESTMENT — KPI ROW ====== -->
+<div class="section-label">SB Investment, Profitability, Revenue <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); text-transform:none; margin-left:8px;">Owner: Jed</span></div>
+<div class="sb-row">
 
-<!-- ====== CHARTS ====== -->
-<div class="section-label">Charts &amp; Trends</div>
-<div class="chart-grid">
-  <div class="chart-card"><div class="card-header"><div class="card-title">Revenue Trend</div><div class="card-badge">Monthly</div></div><canvas id="lineChart"></canvas></div>
-  <div class="chart-card"><div class="card-header"><div class="card-title">Revenue by Segment</div><div class="card-badge">Q4 2025</div></div><canvas id="barChart"></canvas></div>
-</div>
-<div class="chart-grid" style="margin-top:16px;">
-  <div class="chart-card"><div class="card-header"><div class="card-title">Budget Allocation</div><div class="card-badge">FY 2026</div></div><canvas id="doughnutChart" style="max-height:240px;"></canvas></div>
-  <div class="chart-card"><div class="card-header"><div class="card-title">Dept. Performance Radar</div><div class="card-badge">Current</div></div><canvas id="radarChart" style="max-height:240px;"></canvas></div>
-</div>
-
-<!-- ====== GAUGES ====== -->
-<div class="section-label">Gauge / Ring Widgets</div>
-<div class="gauge-row">
-  <div class="gauge-card"><canvas id="gauge1"></canvas><div class="gauge-label">Customer Satisfaction</div><div class="gauge-value" style="color:var(--InformationGreen);">92%</div></div>
-  <div class="gauge-card"><canvas id="gauge2"></canvas><div class="gauge-label">SLA Compliance</div><div class="gauge-value" style="color:var(--ForegroundAction);">87%</div></div>
-  <div class="gauge-card"><canvas id="gauge3"></canvas><div class="gauge-label">Budget Utilization</div><div class="gauge-value" style="color:var(--InformationOrange);">68%</div></div>
-  <div class="gauge-card"><canvas id="gauge4"></canvas><div class="gauge-label">Project Completion</div><div class="gauge-value" style="color:var(--InformationPurple);">74%</div></div>
-</div>
-
-<!-- ====== SPEEDOMETERS ====== -->
-<div class="section-label">Speedometer Gauges</div>
-<div class="speedo-row">
-  <div class="speedo-card">
-    <div class="speedo-title">Performance vs Manned</div>
-    <div class="speedo-wrap"><svg id="speedo1" viewBox="0 0 200 115"></svg><div class="speedo-value">94%</div></div>
-    <div class="speedo-labels"><span>60%</span><span>100%</span></div>
-    <div class="speedo-change up">+12 pts vs last quarter</div>
-  </div>
-  <div class="speedo-card">
-    <div class="speedo-title">Fleet Utilization</div>
-    <div class="speedo-wrap"><svg id="speedo2" viewBox="0 0 200 115"></svg><div class="speedo-value">78%</div></div>
-    <div class="speedo-labels"><span>0%</span><span>100%</span></div>
-    <div class="speedo-change up">+5 pts vs last quarter</div>
-  </div>
-  <div class="speedo-card">
-    <div class="speedo-title">SLA Compliance</div>
-    <div class="speedo-wrap"><svg id="speedo3" viewBox="0 0 200 115"></svg><div class="speedo-value">91%</div></div>
-    <div class="speedo-labels"><span>50%</span><span>100%</span></div>
-    <div class="speedo-change down">-3 pts vs last quarter</div>
-  </div>
-  <div class="speedo-card">
-    <div class="speedo-title">Autonomous Uptime</div>
-    <div class="speedo-wrap"><svg id="speedo4" viewBox="0 0 200 115"></svg><div class="speedo-value">87%</div></div>
-    <div class="speedo-labels"><span>60%</span><span>100%</span></div>
-    <div class="speedo-change up">+8 pts vs last quarter</div>
-  </div>
-</div>
-
-<!-- ====== FUNNEL + BUBBLE ====== -->
-<div class="section-label">Sales Pipeline &mdash; Funnel &amp; Bubble Chart</div>
-<div class="chart-grid">
-  <div class="chart-card">
-    <div class="card-header"><div class="card-title">Sales Pipeline</div><div class="card-badge">Current Quarter</div></div>
-    <div class="funnel-container">
-      <div class="funnel-stage" style="width:100%;height:44px;background:var(--InformationBlue);border-radius:6px 6px 0 0;clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);"><span class="stage-count">248</span>Leads<span class="stage-label">Top of Funnel</span></div>
-      <div class="funnel-stage" style="width:85%;height:44px;background:var(--InformationYellow);clip-path:polygon(0% 0%, 100% 0%, 94% 100%, 6% 100%);"><span class="stage-count">142</span>Qualified<span class="stage-label">57% conversion</span></div>
-      <div class="funnel-stage" style="width:68%;height:44px;background:var(--InformationGreen);clip-path:polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%);"><span class="stage-count">68</span>Proposal<span class="stage-label">48% conversion</span></div>
-      <div class="funnel-stage" style="width:50%;height:44px;background:var(--InformationOrange);clip-path:polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);"><span class="stage-count">42</span>Negotiation<span class="stage-label">62% conversion</span></div>
-      <div class="funnel-stage" style="width:32%;height:44px;background:var(--InformationRed);border-radius:0 0 6px 6px;clip-path:polygon(0% 0%, 100% 0%, 85% 100%, 15% 100%);"><span class="stage-count">18</span>Closed Won<span class="stage-label">43% conversion</span></div>
+  <!-- 1. Engineering Coverage Ratio -->
+  <div class="sb-kpi">
+    <div class="sb-title">Engineering Coverage Ratio</div>
+    <!-- Doughnut arc gauge — large, fills available space -->
+    <div style="position:relative; width:90%; max-width:300px; margin:0 auto; flex:1; min-height:120px; display:flex; align-items:center; justify-content:center;">
+      <canvas id="sbCoverageArc"></canvas>
     </div>
-    <div class="funnel-kpi-row">
-      <div class="funnel-kpi"><div class="fk-label">Active Leads</div><div class="fk-value" style="color:var(--ForegroundAction);">42</div></div>
-      <div class="funnel-kpi"><div class="fk-label">Pipeline Value</div><div class="fk-value" style="color:var(--InformationGreen);">$5.4M</div></div>
-      <div class="funnel-kpi"><div class="fk-label">Win Rate</div><div class="fk-value" style="color:var(--InformationOrange);">35%</div></div>
+    <!-- Label + value tucked up into the arc gap -->
+    <div style="text-align:center; margin-top:-30px;">
+      <span style="display:block; font:300 24px/1.2 var(--header-font); color:var(--GaugeForeground);">coverage</span>
+      <span style="font:700 30px/1.2 var(--header-font); color:var(--ForegroundAction);">85%</span>
     </div>
-  </div>
-  <div class="chart-card"><div class="card-header"><div class="card-title">Deal Landscape</div><div class="card-badge">Bubble = Revenue</div></div><canvas id="bubbleChart"></canvas></div>
-</div>
-
-<!-- ====== TABLE + PROGRESS + ACTIVITY ====== -->
-<div class="section-label">Tables, Progress Bars &amp; Activity Feed</div>
-<div class="two-col">
-  <div class="table-card">
-    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);">Project Status</div>
-      <div class="card-badge" style="font:var(--font-bold) var(--size-metaSm)/var(--lh-metaSm) var(--default-font);padding:4px 10px;border-radius:20px;background:var(--MessageDeliveryBackgroundInfo);color:var(--ForegroundAction);text-transform:uppercase;">6 Active</div>
-    </div>
-    <table>
-      <thead><tr><th>Project</th><th>Owner</th><th>Status</th><th>Budget</th></tr></thead>
-      <tbody>
-        <tr><td>Platform Migration</td><td>J. Chen</td><td><span class="status-pill green">On Track</span></td><td>$420K</td></tr>
-        <tr><td>CRM Integration</td><td>S. Patel</td><td><span class="status-pill amber">At Risk</span></td><td>$185K</td></tr>
-        <tr><td>Data Warehouse</td><td>M. Torres</td><td><span class="status-pill green">On Track</span></td><td>$310K</td></tr>
-        <tr><td>Mobile App v3</td><td>R. Kim</td><td><span class="status-pill red">Delayed</span></td><td>$275K</td></tr>
-        <tr><td>Security Audit</td><td>A. Novak</td><td><span class="status-pill green">On Track</span></td><td>$95K</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div style="display:flex;flex-direction:column;gap:16px;">
-    <div class="chart-card">
-      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);margin-bottom:16px;">Q1 OKR Progress</div>
-      <div class="progress-list">
-        <div class="progress-item"><div class="progress-header"><span class="label">Revenue Target</span><span class="pct">82%</span></div><div class="progress-bar"><div class="fill" style="width:82%;background:var(--InformationGreen);"></div></div></div>
-        <div class="progress-item"><div class="progress-header"><span class="label">Customer Acquisition</span><span class="pct">65%</span></div><div class="progress-bar"><div class="fill" style="width:65%;background:var(--ForegroundAction);"></div></div></div>
-        <div class="progress-item"><div class="progress-header"><span class="label">Product Launches</span><span class="pct">40%</span></div><div class="progress-bar"><div class="fill" style="width:40%;background:var(--InformationOrange);"></div></div></div>
-        <div class="progress-item"><div class="progress-header"><span class="label">Employee Engagement</span><span class="pct">91%</span></div><div class="progress-bar"><div class="fill" style="width:91%;background:var(--InformationPurple);"></div></div></div>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="card-title" style="font:var(--font-light) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font);color:var(--ForegroundStrong);margin-bottom:12px;">Recent Activity</div>
-      <div class="activity-feed">
-        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationGreen);"></div><div><div class="activity-text"><strong>CRM Integration</strong> milestone completed — Phase 2 data sync live</div><div class="activity-time">2 hours ago</div></div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationRed);"></div><div><div class="activity-text"><strong>Mobile App v3</strong> deadline pushed to Mar 28 — vendor dependency</div><div class="activity-time">5 hours ago</div></div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--ForegroundAction);"></div><div><div class="activity-text"><strong>Budget review</strong> scheduled for Friday — Q2 allocation draft ready</div><div class="activity-time">Yesterday</div></div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--InformationPurple);"></div><div><div class="activity-text"><strong>NPS Score</strong> hit 72 — highest in 4 quarters</div><div class="activity-time">2 days ago</div></div></div>
+    <div class="sb-footer">
+      <span class="sb-delta">+6 pts</span>
+      <span class="sb-ctx">vs last quarter</span>
+      <span style="color:var(--InformationGreen); font-size:14px;">↗</span>
+      <div class="sb-legend">
+        <div class="legend-item" style="font:var(--font-normal) var(--size-default)/var(--lh-default) var(--default-font);">34 funded / 40 required</div>
       </div>
     </div>
   </div>
+
+  <!-- 2. Funded Engineering Months -->
+  <div class="sb-kpi">
+    <div class="sb-title">Funded Engineering Months</div>
+    <div class="sb-value-line">
+      <span class="sb-big">14.2</span>
+      <span class="sb-sub">months funded</span>
+    </div>
+    <div class="sb-section-label">Funding by Program</div>
+    <div style="flex:1; min-height:120px; position:relative;">
+      <canvas id="sbFundedMonths"></canvas>
+    </div>
+    <div class="sb-footer">
+      <span class="sb-delta">+2.4 mo</span>
+      <span class="sb-ctx">vs last quarter</span>
+      <span style="color:var(--InformationGreen); font-size:14px;">↗</span>
+      <div class="sb-legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--InformationBlue);"></div>JV-Alpha</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--InformationGreen);"></div>JV-Beta</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--InformationYellow);"></div>Internal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Actual NRE to Budgeted JV NRE -->
+  <div class="sb-kpi">
+    <div class="sb-title">Actual NRE vs Budgeted JV NRE</div>
+    <div class="sb-value-line">
+      <span class="sb-big">92%</span>
+      <span class="sb-sub">of budget consumed</span>
+    </div>
+    <div class="sb-section-label">NRE Spend vs Budget by Quarter</div>
+    <div style="flex:1; min-height:120px; position:relative;">
+      <canvas id="sbNreBudget"></canvas>
+    </div>
+    <div class="sb-footer">
+      <span class="sb-delta">-8%</span>
+      <span class="sb-ctx">under budget</span>
+      <span style="color:var(--InformationGreen); font-size:14px;">↗</span>
+      <div class="sb-legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--InformationBlue);"></div>Actual</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:var(--InformationYellow);"></div>Budget</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SB Program Contribution Margin -->
+  <div class="sb-kpi">
+    <div class="sb-title">SB Program Contribution Margin</div>
+    <div class="sb-value-line">
+      <span class="sb-big">34%</span>
+      <span class="sb-sub">contribution margin</span>
+    </div>
+    <div class="sb-section-label">Margin Trend (Monthly)</div>
+    <div style="flex:1; min-height:120px; position:relative;">
+      <canvas id="sbContribMargin"></canvas>
+    </div>
+    <div class="sb-footer">
+      <span class="sb-delta">+6 pts</span>
+      <span class="sb-ctx">vs last quarter</span>
+      <span style="color:var(--InformationGreen); font-size:14px;">↗</span>
+    </div>
+  </div>
+
 </div>
 
-<div style="text-align:center;padding:32px 0 16px;color:var(--GaugeForeground);font-size:var(--size-Sm);">
+<!-- ====== IPO + BUSINESS UNIT — SIDE BY SIDE ====== -->
+<div class="dual-section-row">
+<div class="dual-section-col">
+<!-- ====== IPO / OTHER INVESTORS — KPI ROW ====== -->
+<div class="section-label">IPO or Other Investors <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); text-transform:none; margin-left:8px;">Owner: Jed</span></div>
+<div class="ipo-row">
+
+  <!-- 1. Investor Leads -->
+  <div class="ipo-kpi">
+    <div class="ipo-title">Investor Leads</div>
+    <div class="ipo-value-line">
+      <span class="ipo-big">18</span>
+      <span class="ipo-sub">active leads</span>
+    </div>
+    <!-- Horizontal stacked bar by tier -->
+    <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--GaugeForeground); width:70px; flex-shrink:0;">Strategic</span>
+        <div style="flex:1; height:14px; background:var(--InnerLines); border-radius:4px; overflow:hidden;">
+          <div style="width:44%; height:100%; background:var(--ForegroundAction); border-radius:4px;"></div>
+        </div>
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--ForegroundStrong); width:20px; text-align:right;">8</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--GaugeForeground); width:70px; flex-shrink:0;">Financial</span>
+        <div style="flex:1; height:14px; background:var(--InnerLines); border-radius:4px; overflow:hidden;">
+          <div style="width:33%; height:100%; background:var(--InformationBlue); border-radius:4px;"></div>
+        </div>
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--ForegroundStrong); width:20px; text-align:right;">6</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--GaugeForeground); width:70px; flex-shrink:0;">Other</span>
+        <div style="flex:1; height:14px; background:var(--InnerLines); border-radius:4px; overflow:hidden;">
+          <div style="width:22%; height:100%; background:var(--InformationGreen); border-radius:4px;"></div>
+        </div>
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--ForegroundStrong); width:20px; text-align:right;">4</span>
+      </div>
+    </div>
+    <!-- Trend sparkline -->
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="ipoLeadsTrend"></canvas>
+    </div>
+    <div class="ipo-tertiary"><span class="ipo-highlight">↑ +5</span> new leads this quarter</div>
+  </div>
+
+  <!-- 2. Up-to-Date Data Room -->
+  <div class="ipo-kpi">
+    <div class="ipo-title">Up-to-Date Data Room</div>
+    <!-- Doughnut arc gauge -->
+    <div style="position:relative; width:80%; max-width:200px; margin:0 auto; flex:1; min-height:0; display:flex; align-items:center; justify-content:center;">
+      <canvas id="ipoDataRoomArc"></canvas>
+    </div>
+    <!-- Label + value tucked up into the arc gap -->
+    <div style="text-align:center; margin-top:-20px;">
+      <span style="display:block; font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground);">readiness</span>
+      <span style="font:var(--font-bold) var(--size-hdrSm)/var(--lh-hdrSm) var(--header-font); color:var(--ForegroundAction);">84%</span>
+    </div>
+    <div class="ipo-tertiary"><span class="ipo-highlight">↑ +8%</span> vs last quarter · 42 of 50 current</div>
+  </div>
+
+  <!-- 3. Banking Relationships -->
+  <div class="ipo-kpi">
+    <div class="ipo-title">Banking Relationships</div>
+    <div class="ipo-value-line">
+      <span class="ipo-big">24</span>
+      <span class="ipo-sub">coverage score</span>
+    </div>
+    <!-- Chart area for grouped bar -->
+    <div style="flex:1; min-height:0; position:relative;">
+      <canvas id="ipoBankingRelChart"></canvas>
+    </div>
+    <div class="ipo-tertiary"><span class="ipo-highlight">↑ +4 pts</span> vs last quarter</div>
+  </div>
+
+</div>
+</div><!-- /dual-section-col (IPO) -->
+
+<div class="dual-section-col">
+<!-- ====== BUSINESS UNIT INVESTMENT — KPI ROW ====== -->
+<div class="section-label">Business Unit Investment <span style="font:var(--font-normal) var(--size-Sm)/var(--lh-Sm) var(--default-font); color:var(--GaugeForeground); text-transform:none; margin-left:8px;">Owner: Jed</span></div>
+<div class="bu-row">
+
+  <!-- 1. Construction BU – SoftBank Alignment -->
+  <div class="bu-kpi">
+    <div class="bu-title">Construction BU <span class="bu-title-sub">– SoftBank Alignment</span></div>
+    <div class="bu-value-line">
+      <span class="bu-big">75<span class="bu-pct">%</span></span>
+      <span class="bu-sub">SB-Aligned</span>
+    </div>
+    <div class="bu-context">3 of 4 Programs Funded by SoftBank</div>
+    <!-- Stacked alignment bar -->
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="bu-bar-track" style="flex:1;">
+          <div class="bu-bar-seg" style="width:75%; background:var(--ForegroundAction);"></div>
+          <div class="bu-bar-seg" style="width:25%; background:var(--InnerLines);"></div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="font:var(--font-bold) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--ForegroundAction);">SB Funded</span>
+        <span style="font:var(--font-normal) var(--size-meta)/var(--lh-meta) var(--default-font); color:var(--GaugeForeground);">Non-SB</span>
+      </div>
+    </div>
+    <div class="bu-status aligned">&#10004; Aligned</div>
+    <div class="bu-tertiary"><span class="bu-highlight">↑ +1 program</span> aligned this quarter · Unaligned: Internal Pilot</div>
+  </div>
+
+  <!-- 2. Board Reporting Deck Readiness -->
+  <div class="bu-kpi">
+    <div class="bu-title">Board Reporting Deck Readiness</div>
+    <div class="bu-value-line">
+      <span class="bu-big">75<span class="bu-pct">%</span></span>
+      <span class="bu-sub">Ready</span>
+    </div>
+    <div class="bu-context">9 of 12 Sections Complete</div>
+    <!-- Doughnut arc gauge -->
+    <div style="position:relative; width:80%; max-width:200px; margin:0 auto; flex:1; min-height:0; display:flex; align-items:center; justify-content:center;">
+      <canvas id="buDeckReadiness"></canvas>
+    </div>
+    <!-- Checklist -->
+    <div class="bu-checklist">
+      <div class="bu-check-item"><span class="bu-check-icon" style="color:var(--InformationGreen);">&#10004;</span> Strategy &amp; Scope</div>
+      <div class="bu-check-item"><span class="bu-check-icon" style="color:var(--InformationGreen);">&#10004;</span> Financials</div>
+      <div class="bu-check-item"><span class="bu-check-icon" style="color:var(--InformationYellow);">&#9888;</span> Risks &amp; Mitigations</div>
+      <div class="bu-check-item"><span class="bu-check-icon" style="color:var(--InformationRed);">&#10008;</span> Capital Ask</div>
+    </div>
+    <div class="bu-tertiary"><span class="bu-highlight">↑ +2 sections</span> completed this quarter</div>
+  </div>
+
+  <!-- 3. Board Readiness Score -->
+  <div class="bu-kpi">
+    <div class="bu-title">Board Readiness Score</div>
+    <div class="bu-value-line">
+      <span class="bu-big">4.1<span class="bu-pct">/5</span></span>
+      <span class="bu-badge">&#10004; Board Ready</span>
+    </div>
+    <!-- Radar chart -->
+    <div style="flex:1; min-height:0; position:relative; display:flex; align-items:center; justify-content:center;">
+      <canvas id="buBoardRadar"></canvas>
+    </div>
+    <div class="bu-tertiary"><span class="bu-highlight">↑ +0.3</span> vs last quarter · Next Review: Q2</div>
+  </div>
+
+</div>
+</div><!-- /dual-section-col (BU) -->
+</div><!-- /dual-section-row -->
+
+<div style="text-align:center;padding:32px 0 16px;color:var(--GaugeForeground);font-size:var(--size-default);">
   Mobius Design System — All widgets dynamically populated from Excel via SheetJS
 </div>
 
@@ -2078,7 +2710,7 @@ function destroyAllCharts() {
   Object.values(chartInstances).forEach(c => { if (c && c.destroy) c.destroy(); });
   chartInstances = {};
   // Clear speedometer SVGs
-  ['speedo1','speedo2','speedo3','speedo4','perfGauge'].forEach(id => {
+  ['perfGauge'].forEach(id => {
     const svg = document.getElementById(id);
     if (svg) svg.innerHTML = '';
   });
@@ -2910,181 +3542,423 @@ function rebuildAllCharts() {
     }
   });
 
-  // LINE CHART
-  chartInstances.line = new Chart(document.getElementById('lineChart'), {
-    type: 'line',
-    data: {
-      labels: ['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
-      datasets: [{
-        label: 'Revenue',
-        data: [1.2, 1.35, 1.28, 1.52, 1.68, 1.75, 1.92, 2.15, 2.4],
-        borderColor: m.action,
-        backgroundColor: m.action.replace(/[\d.]+\)$/, '0.1)'),
-        fill: true, tension: 0.4, pointRadius: 4,
-        pointBackgroundColor: m.action, borderWidth: 2.5
-      },{
-        label: 'Target',
-        data: [1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1],
-        borderColor: m.innerLines, borderDash: [6, 4],
-        fill: false, tension: 0.4, pointRadius: 0, borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, padding: 16 } } },
-      scales: {
-        y: { beginAtZero: false, ticks: { callback: v => '$' + v + 'M' }, grid: { color: m.innerLines } },
-        x: { grid: { display: false } }
-      }
-    }
-  });
+  // =============================================
+  // SB INVESTMENT SECTION CHARTS
+  // =============================================
 
-  // BAR CHART
-  chartInstances.bar = new Chart(document.getElementById('barChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Enterprise', 'Mid-Market', 'SMB', 'Government', 'Education'],
-      datasets: [{ label: 'Q4 Revenue', data: [820, 540, 380, 290, 170],
-        backgroundColor: [m.infoBlue, m.green, m.purple, m.orange, m.yellow],
-        borderRadius: 4, borderSkipped: false, barThickness: 36
-      }]
-    },
-    options: {
-      responsive: true, plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { callback: v => '$' + v + 'K' }, grid: { color: m.innerLines } },
-        x: { grid: { display: false } }
-      }
-    }
-  });
-
-  // DOUGHNUT
-  chartInstances.doughnut = new Chart(document.getElementById('doughnutChart'), {
+  // Engineering Coverage Ratio — Doughnut Arc Gauge (Chart.js)
+  chartInstances.sbCoverageArc = new Chart(document.getElementById('sbCoverageArc'), {
     type: 'doughnut',
     data: {
-      labels: ['Engineering', 'Sales & Marketing', 'Operations', 'R&D', 'Admin'],
-      datasets: [{ data: [35, 25, 18, 15, 7],
-        backgroundColor: [m.infoBlue, m.green, m.orange, m.purple, m.yellow],
-        borderWidth: 0, hoverOffset: 8
-      }]
-    },
-    options: { responsive: true, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 14 } } } }
-  });
-
-  // RADAR
-  chartInstances.radar = new Chart(document.getElementById('radarChart'), {
-    type: 'radar',
-    data: {
-      labels: ['Innovation','Efficiency','Quality','Growth','Culture','Delivery'],
       datasets: [{
-        label: 'Current', data: [85, 72, 90, 78, 88, 80],
-        borderColor: m.action, backgroundColor: m.action.replace(/[\d.]+\)$/, '0.12)'),
-        pointBackgroundColor: m.action, borderWidth: 2
-      },{
-        label: 'Target', data: [90, 85, 85, 90, 90, 90],
-        borderColor: m.innerLines, backgroundColor: 'transparent',
-        pointBackgroundColor: m.innerLines, borderDash: [4, 4], borderWidth: 2
+        data: [85, 15],
+        backgroundColor: [m.action, m.innerLines],
+        borderWidth: 0,
+        borderRadius: 4,
       }]
     },
     options: {
+      cutout: '75%',
+      rotation: -120,         // start at ~7 o'clock (bottom-left)
+      circumference: 240,     // 240° arc, gap centered at bottom
       responsive: true,
-      scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 25, display: false },
-        grid: { color: m.innerLines }, angleLines: { color: m.innerLines }, pointLabels: { font: { size: 11 } } } },
-      plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } }
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
     }
   });
 
-  // BUBBLE
-  chartInstances.bubble = new Chart(document.getElementById('bubbleChart'), {
-    type: 'bubble',
+  // Funded Engineering Months — Horizontal stacked bar by program
+  chartInstances.sbFundedMonths = new Chart(document.getElementById('sbFundedMonths'), {
+    type: 'bar',
     data: {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
       datasets: [
-        { label: 'Enterprise', data: [{x:82,y:420,r:18},{x:65,y:310,r:14},{x:90,y:580,r:22}],
-          backgroundColor: m.infoBlue.replace(/[\d.]+\)$/, '0.45)'), borderColor: m.infoBlue, borderWidth: 1.5 },
-        { label: 'Mid-Market', data: [{x:45,y:180,r:10},{x:58,y:220,r:12},{x:72,y:150,r:8},{x:35,y:95,r:7}],
-          backgroundColor: m.green.replace(/[\d.]+\)$/, '0.4)'), borderColor: m.green, borderWidth: 1.5 },
-        { label: 'SMB', data: [{x:20,y:45,r:5},{x:30,y:65,r:6},{x:40,y:80,r:7},{x:15,y:30,r:4},{x:50,y:55,r:5}],
-          backgroundColor: m.innerLines.replace(/[\d.]+\)$/, '0.5)'), borderColor: m.gaugeFg, borderWidth: 1.5 },
-        { label: 'High Priority', data: [{x:75,y:350,r:16}],
-          backgroundColor: m.orange.replace(/[\d.]+\)$/, '0.5)'), borderColor: m.orange, borderWidth: 2 }
+        {
+          label: 'JV-Alpha',
+          data: [4.2, 3.8, 3.5, 3.0],
+          backgroundColor: m.infoBlue,
+          barPercentage: 0.65,
+          categoryPercentage: 0.75
+        },
+        {
+          label: 'JV-Beta',
+          data: [2.5, 2.8, 3.0, 2.2],
+          backgroundColor: m.green,
+          barPercentage: 0.65,
+          categoryPercentage: 0.75
+        },
+        {
+          label: 'Internal',
+          data: [1.0, 1.2, 0.8, 1.5],
+          backgroundColor: m.yellow,
+          barPercentage: 0.65,
+          categoryPercentage: 0.75
+        }
       ]
     },
     options: {
       responsive: true,
-      plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 14 } },
-        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw.y}K deal, ${ctx.raw.x}% probability` } } },
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
       scales: {
-        x: { title: { display: true, text: 'Win Probability %', color: m.gaugeFg }, min: 0, max: 100, grid: { color: m.innerLines } },
-        y: { title: { display: true, text: 'Deal Size ($K)', color: m.gaugeFg }, beginAtZero: true,
-          ticks: { callback: v => '$' + v + 'K' }, grid: { color: m.innerLines } }
+        x: {
+          stacked: true,
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => v + 'mo'
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        },
+        y: {
+          stacked: true,
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        }
       }
     }
   });
 
-  // GAUGE RINGS
-  function createGauge(id, value, color) {
-    chartInstances[id] = new Chart(document.getElementById(id), {
-      type: 'doughnut',
-      data: { datasets: [{ data: [value, 100 - value], backgroundColor: [color, m.gaugeDataBg], borderWidth: 0, circumference: 270, rotation: 225 }] },
-      options: { responsive: true, cutout: '78%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-    });
-  }
-  createGauge('gauge1', 92, m.green);
-  createGauge('gauge2', 87, m.action);
-  createGauge('gauge3', 68, m.orange);
-  createGauge('gauge4', 74, m.purple);
+  // Actual NRE vs Budgeted — Grouped bar (Actual vs Budget per quarter)
+  chartInstances.sbNreBudget = new Chart(document.getElementById('sbNreBudget'), {
+    type: 'bar',
+    data: {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [
+        {
+          label: 'Actual',
+          data: [420, 380, 350, 310],
+          backgroundColor: m.infoBlue,
+          borderRadius: 3,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        },
+        {
+          label: 'Budget',
+          data: [450, 400, 380, 350],
+          backgroundColor: m.yellow,
+          borderRadius: 3,
+          barPercentage: 0.7,
+          categoryPercentage: 0.65
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          min: 0,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => '$' + v + 'K',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
 
-  // SPEEDOMETERS
-  function createSpeedometer(svgId, value, min, max) {
-    const svg = document.getElementById(svgId);
-    const cx = 100, cy = 105, r = 85;
-    const startAngle = Math.PI;
-    const zones = [
-      { end: 0.25, color: m.gaugeCrit },
-      { end: 0.45, color: m.gaugeWarn },
-      { end: 0.60, color: m.yellow },
-      { end: 0.80, color: m.gaugeOK },
-      { end: 1.00, color: m.gaugeInteract },
-    ];
-    let prevEnd = 0;
-    zones.forEach(zone => {
-      const a1 = startAngle + prevEnd * Math.PI;
-      const a2 = startAngle + zone.end * Math.PI;
-      const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
-      const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', `M ${x1} ${y1} A ${r} ${r} 0 ${(zone.end - prevEnd) > 0.5 ? 1 : 0} 1 ${x2} ${y2}`);
-      path.setAttribute('stroke', zone.color);
-      path.setAttribute('stroke-width', '14');
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke-linecap', 'butt');
-      svg.appendChild(path);
-      prevEnd = zone.end;
-    });
-    const fraction = (value - min) / (max - min);
-    const needleAngle = startAngle + fraction * Math.PI;
-    const nx = cx + (r - 12) * Math.cos(needleAngle);
-    const ny = cy + (r - 12) * Math.sin(needleAngle);
-    const needle = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    needle.setAttribute('x1', cx); needle.setAttribute('y1', cy);
-    needle.setAttribute('x2', nx); needle.setAttribute('y2', ny);
-    needle.setAttribute('stroke', m.fgStrong); needle.setAttribute('stroke-width', '3');
-    needle.setAttribute('stroke-linecap', 'round');
-    svg.appendChild(needle);
-    const tip = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    tip.setAttribute('cx', nx); tip.setAttribute('cy', ny); tip.setAttribute('r', '4');
-    tip.setAttribute('fill', m.action);
-    svg.appendChild(tip);
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', '6');
-    dot.setAttribute('fill', m.gaugeDataBg); dot.setAttribute('stroke', m.innerLines);
-    dot.setAttribute('stroke-width', '2');
-    svg.appendChild(dot);
-  }
-  createSpeedometer('speedo1', 94, 60, 100);
-  createSpeedometer('speedo2', 78, 0, 100);
-  createSpeedometer('speedo3', 91, 50, 100);
-  createSpeedometer('speedo4', 87, 60, 100);
+  // SB Program Contribution Margin — Area chart (monthly trend)
+  chartInstances.sbContribMargin = new Chart(document.getElementById('sbContribMargin'), {
+    type: 'line',
+    data: {
+      labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+      datasets: [{
+        label: 'Margin',
+        data: [28, 29, 31, 30, 32, 33, 32, 34, 34],
+        borderColor: m.green,
+        backgroundColor: m.green.replace(/[\d.]+\)$/, '0.2)'),
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: m.green,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true }
+      },
+      scales: {
+        x: {
+          display: true,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg
+          },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          min: 20,
+          max: 45,
+          ticks: {
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            callback: v => v + '%',
+            maxTicksLimit: 4
+          },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // =============================================
+  // IPO / OTHER INVESTORS SECTION CHARTS
+  // =============================================
+
+  // Investor Leads — Sparkline trend (last 6 quarters)
+  chartInstances.ipoLeadsTrend = new Chart(document.getElementById('ipoLeadsTrend'), {
+    type: 'line',
+    data: {
+      labels: ['Q1 \'25', 'Q2 \'25', 'Q3 \'25', 'Q4 \'25', 'Q1 \'26', 'Q2 \'26'],
+      datasets: [{
+        data: [5, 7, 9, 11, 13, 18],
+        borderColor: m.action,
+        backgroundColor: m.action.replace(/[\d.]+\)$/, '0.12)'),
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: m.action,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: true,
+          ticks: { font: { size: 9, family: "'Roboto', sans-serif" }, color: m.gaugeFg },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          min: 0,
+          ticks: { font: { size: 9, family: "'Roboto', sans-serif" }, color: m.gaugeFg, maxTicksLimit: 4 },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // Up-to-Date Data Room — Doughnut Arc Gauge (84% readiness)
+  chartInstances.ipoDataRoomArc = new Chart(document.getElementById('ipoDataRoomArc'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [84, 16],
+        backgroundColor: [m.action, m.innerLines],
+        borderWidth: 0,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      cutout: '75%',
+      rotation: -120,
+      circumference: 240,
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    }
+  });
+
+  // Banking Relationships — Grouped bar (by tier per quarter)
+  chartInstances.ipoBankingRelChart = new Chart(document.getElementById('ipoBankingRelChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Q1 \'25', 'Q2 \'25', 'Q3 \'25', 'Q4 \'25', 'Q1 \'26'],
+      datasets: [
+        {
+          label: 'Tier 1',
+          data: [2, 2, 3, 3, 4],
+          backgroundColor: m.action,
+          borderRadius: 3,
+          barPercentage: 0.75,
+          categoryPercentage: 0.7
+        },
+        {
+          label: 'Regional',
+          data: [1, 2, 2, 3, 3],
+          backgroundColor: m.blue || m.action,
+          borderRadius: 3,
+          barPercentage: 0.75,
+          categoryPercentage: 0.7
+        },
+        {
+          label: 'Advisory',
+          data: [1, 1, 2, 2, 3],
+          backgroundColor: m.green,
+          borderRadius: 3,
+          barPercentage: 0.75,
+          categoryPercentage: 0.7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        x: {
+          display: true,
+          ticks: { font: { size: 9, family: "'Roboto', sans-serif" }, color: m.gaugeFg },
+          grid: { display: false },
+          border: { display: false }
+        },
+        y: {
+          display: true,
+          beginAtZero: true,
+          ticks: { font: { size: 9, family: "'Roboto', sans-serif" }, color: m.gaugeFg, maxTicksLimit: 4 },
+          grid: { color: m.innerLines + '33' },
+          border: { display: false }
+        }
+      }
+    }
+  });
+
+  // =============================================
+  // BUSINESS UNIT INVESTMENT SECTION CHARTS
+  // =============================================
+
+  // Board Reporting Deck Readiness — Multi-color doughnut arc gauge
+  chartInstances.buDeckReadiness = new Chart(document.getElementById('buDeckReadiness'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [25, 20, 15, 15, 25],
+        backgroundColor: [
+          m.red,                    // red zone
+          '#FF8C00',                // orange zone
+          m.yellow,                 // yellow zone
+          m.green,                  // green zone
+          m.green.replace(/[\d.]+\)$/, '0.6)')  // light green zone
+        ],
+        borderWidth: 0,
+        borderRadius: 0,
+      }]
+    },
+    options: {
+      cutout: '68%',
+      rotation: -120,
+      circumference: 240,
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+    },
+    plugins: [{
+      // Draw needle pointing to 75%
+      id: 'deckNeedle',
+      afterDraw(chart) {
+        const { ctx, chartArea } = chart;
+        const cx = (chartArea.left + chartArea.right) / 2;
+        const cy = (chartArea.top + chartArea.bottom) / 2;
+        const startAngle = (-120 * Math.PI) / 180 + Math.PI / 2;
+        const totalAngle = (240 * Math.PI) / 180;
+        const needleFraction = 0.75;
+        const angle = startAngle + needleFraction * totalAngle;
+        const outerR = chart.getDatasetMeta(0).data[0].outerRadius * 0.85;
+        const nx = cx + outerR * Math.cos(angle);
+        const ny = cy + outerR * Math.sin(angle);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = m.fgStrong;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        // center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = m.fgStrong;
+        ctx.fill();
+        // tip dot
+        ctx.beginPath();
+        ctx.arc(nx, ny, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }]
+  });
+
+  // Board Readiness Score — Radar chart
+  chartInstances.buBoardRadar = new Chart(document.getElementById('buBoardRadar'), {
+    type: 'radar',
+    data: {
+      labels: ['Strategy', 'Financials', 'KPIs', 'Risks', 'Leadership'],
+      datasets: [{
+        label: 'Current',
+        data: [4.5, 4.2, 3.8, 3.9, 4.1],
+        backgroundColor: m.action.replace(/[\d.]+\)$/, '0.25)'),
+        borderColor: m.action,
+        borderWidth: 2,
+        pointBackgroundColor: m.action,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: true } },
+      scales: {
+        r: {
+          beginAtZero: true,
+          min: 0,
+          max: 5,
+          ticks: {
+            stepSize: 1,
+            font: { size: 9, family: "'Roboto', sans-serif" },
+            color: m.gaugeFg,
+            backdropColor: 'transparent',
+          },
+          pointLabels: {
+            font: { size: 11, family: "'Roboto', sans-serif" },
+            color: m.fgStrong,
+          },
+          grid: { color: m.innerLines + '44' },
+          angleLines: { color: m.innerLines + '44' },
+        }
+      }
+    }
+  });
+
 }
 
 // =============================================
